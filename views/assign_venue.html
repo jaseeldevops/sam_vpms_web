@@ -1,0 +1,60 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Assign Venue</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Assign Venue</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button ng-if="previousState.name =='app.userProfile'" class="btn btn-default m-t-25" ui-sref="app.userProfile">Back</button>
+        <button ng-if="previousState.name =='app.accountUserDetails'" class="btn btn-default m-t-25" ui-sref="app.accountUserDetails">Back</button>
+        <button ng-if="previousState.name =='app.userDetails'" class="btn btn-default m-t-25" ui-sref="app.userDetails">Back</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-offset-2 col-lg-8">
+            <div class="ibox-content">
+                <p align="center">You may assign an attendant to a venue.
+                    <!-- <br> -->Please note that if you can only assign one
+                    <!-- <br> -->location to an attendant, more than one will be
+                    <!-- <br> -->applicable if you are a supervisor.
+                </p>
+                <div ng-if="$user.role=='admin'">
+                    <ul class="list-unstyled file-list full-height-scroll" full-scroll>
+                        <li ng-repeat="venues in venue track by $index">
+                            <div>
+                                <h3><input icheck type="checkbox" ng-model="venues.checked"> {{venues.venueName | capitalize}}</h3>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="text-right">
+                        <button class="btn btn-sm btn-primary" ng-click="assignVenuePush(venue)"><strong>Assign</strong></button>
+                        <button ng-if="previousState.name !='app.accountUserDetails'" type="button" class="btn btn-sm btn-muted" ui-sref="app.userProfile"><strong>Back</strong></button>
+                        <button ng-if="previousState.name =='app.accountUserDetails'" type="button" class="btn btn-sm btn-muted" ui-sref="app.accountUserDetails"><strong>Back</strong></button>
+                    </div>
+                </div>
+                <div ng-if="$user.role!='admin'">
+                    <ul class="list-unstyled file-list full-height-scroll" full-scroll>
+                        <li ng-repeat="venues in venue track by $index">
+                            <div>
+                                <h3><input icheck type="checkbox" ng-model="venues.checked"> {{venues.venueName | capitalize}}</h3>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="text-right">
+                        <button class="btn btn-sm btn-primary" ng-click="assignVenuePush(venue)"><strong>Assign</strong></button>
+                        <button ng-if="previousState.name =='app.userProfile'" type="button" class="btn btn-sm btn-muted" ui-sref="app.userProfile"><strong>Back</strong></button>
+                        <button ng-if="previousState.name =='app.accountUserDetails'" type="button" class="btn btn-sm btn-muted" ui-sref="app.accountUserDetails"><strong>Back</strong></button>
+                        <button ng-if="previousState.name =='app.userDetails'" class="btn btn-sm btn-muted" ui-sref="app.userDetails"><strong>Back</strong></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

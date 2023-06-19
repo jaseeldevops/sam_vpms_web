@@ -1,0 +1,245 @@
+<div class="row wrapper border-bottom white-bg page-heading" ng-init="socketInitForParkedCars()">
+    <div class="col-lg-9">
+        <h2>Dashboard</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Dashboard</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight" ng-controller="accountCtrl">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-car fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>  Total Cars in<br>Process / Processed</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{dashboardDatumforWidgets.parked + dashboardDatumforWidgets.requested + dashboardDatumforWidgets.complete}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-product-hunt fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>  Total Cars in <br> Parked State</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{dashboardDatumforWidgets.parked}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-registered fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total Cars in<br> Requested State</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{dashboardDatumforWidgets.requested}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-road fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total Cars in <br> Completed State</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{dashboardDatumforWidgets.complete}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="ibox float-e-margins m-t-sm border">
+                <div class="ibox-title">
+                    <h5>This Month Transactions</h5>
+                    <div class="text-right">
+                        <div data-toggle="buttons" class="btn-group">
+                            <label class="btn btn-sm btn-white" ng-click="DashboardWidgetForcalulatingVenueWise('count')"> <input type="radio" id="option1" name="options"> Car Transaction </label>
+                            <label class="btn btn-sm btn-white" ng-click="DashboardWidgetForcalulatingVenueWise('fees')"> <input type="radio" id="option2" name="options"> Fees Collected </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="ibox-content" ng-class="{ 'h-250'  : (dashboardNVD3.length == 0) }">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <nvd3 options="optionsNVD3Dashboard" ng-if="dashboardNVD3.length > 0" chart-colors="lineColor" data="dashboardNVD3" class="with-3d-shadow with-transitions"></nvd3>
+                        </div>
+                    </div>
+                    <div class="row center-text-chart" ng-if="dashboardNVD3.length == 0 && !loading" class="widthheigh">
+                        <p class="text-muted text-center">No Data Available </p>
+                    </div>
+                    <div class="row center-text-chart" ng-if="loading && dashboardNVD3.length == 0" class="widthheigh">
+                        <div class="spiner-example" style="padding-top:10px!important;">
+                            <div class="sk-spinner sk-spinner-three-bounce">
+                                <div class="sk-bounce1"></div>
+                                <div class="sk-bounce2"></div>
+                                <div class="sk-bounce3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="col-lg-12 p-r-0">
+                <div class="widget style1 red-bg">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <i class="fa fa-money fa-5x"></i>
+                        </div>
+                        <div class="col-xs-8 text-right">
+                            <span> Today Fee <br> Collected </span>
+                            <h2 class="font-bold" ng-if="dashboardDatum[1].fees != null"><span count-from="0" count-to="{{dashboardDatum[1].fees.toFixed(0)}}"></span>
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                            <h2 class="font-bold" ng-if="dashboardDatum[1].fees == null"> 0
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 p-r-0">
+                <div class="widget style1">
+                    <div class="row">
+                        <div class="col-xs-4 text-center">
+                            <i class="fa fa-money fa-5x"></i>
+                        </div>
+                        <div class="col-xs-8 text-right">
+                            <span> Total Fees Collected</span>
+                            <h2 class="font-bold" ng-if="dashboardDatum[0].fees != null"><span count-from="0" count-to="{{dashboardDatum[0].fees.toFixed(0)}}"></span>
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                            <h2 class="font-bold" ng-if="dashboardDatum[0].fees == null"> 0
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="$user.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 p-r-0">
+                <div class="widget lazur-bg">
+                    <h2>
+                        {{$user.accountID.accountName}}
+                    </h2>
+                    <ul class="list-unstyled m-t-xs">
+                        <!-- <li>
+                            <span class="fa fa-map-marker m-r-xs"></span>
+                            <label>Region : </label> &nbsp;{{$user.accountID.region}}
+                        </li> -->
+                        <li>
+                            <span class="fa fa-calendar-o m-r-xs"></span>
+                            <label>Active from : </label> &nbsp;{{$user.accountID.createdAt | date:' yyyy-MM-dd '}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- <div class="widget lazur-bg p-xl m-t-sm height-330">
+                <h2>
+                    {{$user.accountID.accountName}}
+                </h2>
+                <ul class="list-unstyled m-t-md">
+                    <li>
+                        <span class="fa fa-map-marker m-r-xs"></span>
+                        <label>Region : </label> &nbsp;{{$user.accountID.region}}
+                    </li>
+                    <li>
+                        <span class="fa fa-calendar-o m-r-xs"></span>
+                        <label>Active from : </label> &nbsp;{{$user.accountID.createdAt | date:' yyyy-MM-dd '}}
+                    </li>
+                </ul>
+            </div> -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="widget style1 lazur-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-map-marker fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total <br> Venue</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{accountVenuesofAccountAdmin.length}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 yellow-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-user fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span> Total <br>Users</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{dashboardDatum[2].users}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 yellow-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-user fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span> Total Supervisor / Chauffures </span>
+                        <h2 class="font-bold" ng-if="dashboardDatum[2].userCount"><span count-from="0" count-to="{{dashboardDatum[2].userCount}}"></span></h2>
+                        <h2 class="font-bold" ng-if="!dashboardDatum[2].userCount">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 lazur-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-user-circle-o fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total  <br> Customer Types</span>
+                        <h2 class="font-bold"><span count-from="0" count-to="{{$user.accountID.customerTypes.length}}"></span></h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row m-t-lg">
+        <div class="col-lg-12">
+            <div class="ibox-content border">
+                <h2>Application Running Zone</h2>
+                <!-- <small>This is simple example of map</small> -->
+                <div ng-controller="dashboardMap as map">
+                    <div vector-map style="height: 300px;" my-map-data="map.data"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,2008 @@
+<div class="row wrapper border-bottom white-bg page-heading"
+    ng-init="mouseClickEventFiles();socketInitForParkedCars();">
+    <div class="col-lg-3">
+        <h2>Car Transactions</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li>
+                <a ng-if="selectedOptionsforanAnalysis.venue.id">{{ selectedOptionsforanAnalysis.venue.venueName }}</a>
+                <a ng-if="!selectedOptionsforanAnalysis.venue.id"> All </a>
+            </li>
+            <li class="active">
+                <strong>Car Transactions</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-6 m-t-md" ng-init="searchCars2=searchCars">
+        <div ng-if="$user.role!='admin'">
+            <div class="">
+                <div class="row">
+                    <div class="col-lg-12 padding-0">
+                        <div class="col-lg-6" ng-controller="venueCtrl" ng-if="$user.role=='accountadmin'">
+                            <label>Filter by location : </label>
+                            <div ng-if="venue.length > 0">
+                                <ui-select ng-model="selectedOptionsforanAnalysis.venue" theme="bootstrap"
+                                    ng-change="filterVenueWiseCarDetails();venueSelectedByAccountAdmin()"
+                                    reset-search-input="false">
+                                    <ui-select-match class="ui-select-match" placeholder="All Venue">
+                                        {{$select.selected.venueName}}
+                                        <span ng-if="!$select.selected.venueName">All Venue</span>
+                                        <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos"
+                                            ng-click="clear($event, $select);stopEventFunction($event)"><i
+                                                class="glyphicon glyphicon-remove"></i></a>
+                                    </ui-select-match>
+                                    <ui-select-choices class="ui-select-choices"
+                                        repeat="venueDetails in venue | custom : $select.search"
+                                        refresh="refreshResults($select)" refresh-delay="0">
+                                        <div ng-bind-html="venueDetails.venueName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6" ng-if="$user.role=='manager'">
+                            <label>Filter by location : </label>
+                            <div ng-if="$user.venues.length > 0">
+                                <ui-select ng-model="selectedOptionsforanAnalysis.venue" theme="bootstrap"
+                                    ng-change="filterVenueWiseCarDetails()" reset-search-input="false">
+                                    <ui-select-match placeholder="All Venue">{{$select.selected.venueName}}
+                                        <span ng-if="!$select.selected.venueName">All Venue</span>
+                                        <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos"
+                                            ng-click="clear($event, $select);stopEventFunction($event)"><i
+                                                class="glyphicon glyphicon-remove"></i></a>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="venueDetails in $user.venues | filter: $select.search"
+                                        refresh="refreshResults($select)" refresh-delay="0">
+                                        <div ng-bind-html="venueDetails.venueName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 p-r-0"
+                            ng-style="($user.role == 'chauffeur' || $user.role == 'driver')  && {'margin-left': '25%'}"
+                            style="margin-top: 4px;">
+                            <label>Search Plate number / Ticket / Model: </label>
+                            <div class="input-group pull-right">
+                                <input focus="true" type="text" placeholder="Search" id="searchPlateTicketNumber"
+                                    class="input form-control input-sm" ng-model="searchCars2"
+                                    ng-keyup="funt(searchCars2, $event)">
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-sm btn-primary" style="cursor: none;">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm m-l-5 btn-white"
+                                        ng-click="clearFunctionforSearch();searchCars2=''">
+                                        Clear
+                                    </button>
+                                    <button type="button" class="btn btn-sm m-l-5 btn-danger" ng-click="clearFunctionforSearch2();searchCars2=''">
+                                       Filter x
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 text-right m-t-md">
+        <!-- <button type="button" class="btn btn-primary m-t-25" ng-click="venueSelectedByAccountAdmin()" ng-disabled="loading">
+            <span ng-if="!loading">Refresh</span>  <i class="fa fa-spinner fa-spin" ng-if="loading" style="font-size:24px"></i> 
+        </button> -->
+        <button class="btn btn-primary m-t-25 ladda-button" ladda="loading" data-style="slide-up" type="button"
+            ng-click="venueSelectedByAccountAdmin()">
+            <!-- <i class="fa fa-download"></i>&nbsp;&nbsp; -->
+            <span class="bold">Refresh</span>
+        </button>
+
+        <button class="btn red-bg m-t-25" ui-sref="app.addCar" ng-click="initalizeFunctionforBarreadbleCode()">Add
+            Car</button>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content p-t-10 animated fadeIn">
+    <div class="row">
+        <div class="col-lg-12 padding-0">
+            <div class="tabs-container">
+                <uib-tabset>
+                    <div class="pull-right" ng-if="$user.role=='admin'">
+                        <input type="text" placeholder="Search" class="input form-control input-sm"
+                            ng-model="searchCars2" ng-keyup="funt(searchCars2, $event)">
+                    </div>
+                    <div class="col text-right pull-right padding-5" ng-if="activeTabs[2]">
+                        <div class="bg-white">
+                            <button type="button" class="btn btn-outline btn-success" ng-click="viewToggle('table')"
+                                ng-if="!tableView">
+                                <i class="fa fa-table"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline btn-info" ng-click="viewToggle('grid')"
+                                ng-if="!gridView">
+                                <i class="fa fa-th-large"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col text-right pull-right padding-5" ng-if="activeTabs[0]">
+                        <div class="bg-white">
+                            <button type="button" class="btn btn-outline btn-success"
+                                ng-click="viewToggleLS(0, 'table')" ng-if="!tableView0">
+                                <i class="fa fa-table"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline btn-info" ng-click="viewToggleLS(0,'grid')"
+                                ng-if="!gridView0">
+                                <i class="fa fa-th-large"></i>
+                            </button>
+                        </div>
+                    </div>  
+                    <div class="col text-right pull-right padding-5" ng-if="activeTabs[1] == true">
+                        <div class="bg-white">
+                            <button type="button" class="btn btn-outline btn-success" ng-click="viewToggleLS(1,'table')"
+                                ng-if="!tableView1">
+                                <i class="fa fa-table"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline btn-info" ng-click="viewToggleLS(1, 'grid')"
+                                ng-if="!gridView1">
+                                <i class="fa fa-th-large"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <uib-tab heading="Parked Car ({{totalParkedCar}})" select="remember(0)" active="activeTabs[0]"
+                        ng-click="focusFun();">
+                        <div class="panel-body">
+                            <div class="wrapper p-t-15 p-l-0 p-r-0 wrapper-content animated fadeInRight">
+                                <div ng-if="gridView0">
+                                    <!-- infinite-scroll='loadMoreCar(filteredParkedCar.length, "parked", searchCars2)' infinite-scroll-immediate-check="false" infinite-scroll-disabled='loadingScrollBusy'  -->
+                                    <div class="col-lg-12 padding-0">
+                                        <div class="col-lg-4" ng-repeat="parked in filteredParkedCar track by $index">
+                                            <div class="contact-box padding-10" ng-click="listParkedDetails(parked)"
+                                                ng-style="parked.status=='parked' && {'border': 'solid 3px #055aa5'}"
+                                                style="height:103px;">
+                                                <div class="row">
+                                                    <div class="col-lg-3">
+                                                        <div class="text-center">
+                                                            <!-- {{parked.log[0].by}} -->
+                                                            <img class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-if="parked.log[0].userProfile"
+                                                                class="img-avatar margintop5"
+                                                                ng-src="{{parked.log[parked.log.length -1].userProfile}}"
+                                                                on-error-src-driver />
+                                                            <img class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-if="!parked.employeeID.profileImage && parked.log[0].by != 'Unassigned' && !parked.log[parked.log.length -1].userProfile && parked.log[0].by != null"
+                                                                src="img/unknown.png">
+                                                            <img class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-if="parked.log[0].by == 'Unassigned' || parked.log[0].by == null"
+                                                                ng-click="stopEventFunction($event);driverUpdateModalOpen(parked);"
+                                                                src="img/question_user.jpg ">
+                                                            <!-- <img class="img-circle m-t-xs" width="50px" ng-if="parked.employeeID.profileImage" class="img-avatar margintop5" ng-src="{{ipAddress}}/images/{{parked.employeeID.profileImage}}" on-error-src-user/>  ng-if="parked.amountPaid"-->
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-5">
+                                                        <h5 class="allcaps text-inline" style="max-width: 125%;">
+                                                            <strong>{{parked.parkingID}} &nbsp;&mdash;&nbsp;
+                                                                {{parked.plateNumber}}</strong>
+                                                        </h5>
+                                                        <br>
+                                                        <p class="text-inline m-b-0" style="max-width: 125%;">
+                                                            <i class="fa fa-map-marker"></i> {{parked.parkingZone}}
+                                                            <span ng-show="$user.role=='admin'">
+                                                                //
+                                                                {{parked.accountID.accountName - parked.parkingID | capitalize}}
+                                                            </span>
+                                                            <span
+                                                                ng-show="$user.role=='accountadmin' || $user.role=='manager'">
+                                                                // {{parked.venue.venueName | capitalize}}</span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            id="ID{{parked.parkingID}}"
+                                                            ng-click="stopEventFunction($event);requestCarByUser(parked);"
+                                                            ng-if="parked.free && (parked.venue.settings.requestCar)">
+                                                            Request
+                                                            <!-- ng-if="parked.free && ((parked.venue.settings.requestCar && $user.role !='accountadmin') || $user.role =='accountadmin')" -->
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            id="ID{{parked.parkingID}}"
+                                                            ng-click="stopEventFunction($event);requestCarByUser(parked);"
+                                                            ng-if="!parked.free && !parked.venue.settings.verifyOption">
+                                                            Request
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            ng-click="stopEventFunction($event);openCompleteModal($event,parked)"
+                                                            ng-if="parked.free && parked.venue.settings.completeCar"
+                                                            id="ID{{parked.parkingID}}">
+                                                            Complete
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            id="ID{{parked.parkingID}}"
+                                                            ng-click="openVerifyModal(parked);stopEventFunction($event);"
+                                                            ng-if="!parked.free && parked.venue.settings.verifyOption">
+                                                            Verify
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            ng-click="editCar(parked);stopEventFunction($event);">
+                                                            Edit
+                                                        </button>
+                                                        <!-- <div class="m-t-100-p" uib-dropdown>
+                                                            <a class="count-info p-xs" href uib-dropdown-toggle ng-click="openPopover($event,parked);stopEventFunction($event);">
+                                                                <i class="fa fa-ellipsis-v fa-lg"></i>
+                                                            </a>
+                                                            <ul class="dropdown-menu-left" role="menu" uib-dropdown-menu="">
+                                                                <li ng-click="stopEventFunction($event);">
+                                                                    <a ui-sref="app.editCar({ carDetials :parked})">Edit Car</a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="" ng-click="stopEventFunction($event);requestCarByUser($parent.carData);">Make Request</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div> -->
+                                                    </div>
+                                                    <div class="col-lg-12 text-center">
+                                                        <h4 class="all-caps">
+                                                            <strong ng-if="parked.validatedBy">Validated</strong>
+                                                            <strong ng-if="parked.amountPaid">Paid</strong>
+                                                        </h4>
+                                                    </div>
+                                                    <div class="clearfix"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div ng-if="totalParkedCar == 0 && !loading" class="widthheigh">
+                                            <p class="text-muted text-center">{{nocarfound}}</p>
+                                        </div>
+                                        <div ng-if="loading" class="widthheigh">
+                                            <div class="spiner-example">
+                                                <div class="sk-spinner sk-spinner-wave">
+                                                    <div class="sk-rect1"></div>
+                                                    <div class="sk-rect2"></div>
+                                                    <div class="sk-rect3"></div>
+                                                    <div class="sk-rect4"></div>
+                                                    <div class="sk-rect5"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center"
+                                        ng-if="totalParkedCar != filteredParkedCar.length && totalParkedCar > filteredParkedCar.length">
+                                        <button class="btn btn-default" ng-if="!loading"
+                                            ng-click="loadMoreCar(filteredParkedCar.length, 'parked', searchCars2);">Load
+                                            more
+                                            <span class="loading"></span>
+                                        </button>
+                                    </div>
+                                    <div ng-if="loadingScrollBusy" class="widthheigh">
+                                        <br>
+                                        <br>
+                                        <div class="spiner-example spinner-padding margin-20">
+                                            <div class="sk-spinner sk-spinner-three-bounce">
+                                                <div class="sk-bounce1"></div>
+                                                <div class="sk-bounce2"></div>
+                                                <div class="sk-bounce3"></div>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <br>
+                                    </div>
+                                </div>
+                                <div ng-if="tableView0">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Ticket Number</th>
+                                                <th>Plate Number</th>
+                                                <th>Parking Zone</th>
+                                                <th>Car Model</th>
+                                                <th>Car Colour</th>
+                                                <th>CVA - In </th>
+                                                <th>Time In</th>
+                                                <th>More Information</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="requested in filteredParkedCar track by $index">
+                                                <td class="all-caps">{{requested.parkingID}}
+                                                    <h4 class="all-caps">
+                                                        <strong ng-if="requested.validatedBy">Validated</strong>
+                                                        <strong ng-if="requested.amountPaid">Paid</strong>
+                                                    </h4>
+                                                </td>
+                                                <td class="all-caps">{{requested.plateNumber}}</td>
+                                                <td>{{ requested.parkingZone | capitalize}}
+
+                                                    <span ng-show="$user.role=='admin'">
+                                                        //  <i class="fa fa-map-marker"></i>
+                                                        {{requested.accountID.accountName - requested.parkingID | capitalize}}
+                                                    </span>
+                                                    <span
+                                                        ng-show="$user.role=='accountadmin' || $user.role=='manager'">
+                                                        //  <i class="fa fa-map-marker"></i> {{requested.venue.venueName | capitalize}}</span>
+
+                                                </td>
+                                                <td>{{ requested.brand | allUpperCase}}</td>
+                                                <td>{{ requested.color | allUpperCase}}</td>
+                                                <td>{{requested.log[requested.log.length-1].employeeName | capitalize}}
+                                                </td>
+                                                <td>{{ requested.createdAt | date : 'dd MMM yyyy'}} {{ requested.createdAt | date : 'HH:mm'}}</td>
+                                                <td class="text-center" width="150px">
+                                                    <button class="btn btn-xs btn-default"
+                                                        ng-click="listParkedDetails(requested)">
+                                                        View
+                                                    </button>
+                                                    <!--  -->
+                                                    <button class="btn btn-xs btn-success btn-block"
+                                                            id="ID{{requested.parkingID}}"
+                                                            ng-click="stopEventFunction($event);requestCarByUser(requested);"
+                                                            ng-if="requested.free && (requested.venue.settings.requestCar)">
+                                                            Request
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            id="ID{{requested.parkingID}}"
+                                                            ng-click="stopEventFunction($event);requestCarByUser(requested);"
+                                                            ng-if="!requested.free && !requested.venue.settings.verifyOption">
+                                                            Request
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            ng-click="stopEventFunction($event);openCompleteModal($event,requested)"
+                                                            ng-if="requested.free && requested.venue.settings.completeCar"
+                                                            id="ID{{requested.parkingID}}">
+                                                            Complete
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            id="ID{{requested.parkingID}}"
+                                                            ng-click="openVerifyModal(requested);stopEventFunction($event);"
+                                                            ng-if="!requested.free && requested.venue.settings.verifyOption">
+                                                            Verify
+                                                        </button>
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            ng-click="editCar(requested);stopEventFunction($event);">
+                                                            Edit
+                                                        </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="widthheigh" ng-if="loading">
+                                        <div class="spiner-example">
+                                            <div class="sk-spinner sk-spinner-wave">
+                                                <div class="sk-rect1"></div>
+                                                <div class="sk-rect2"></div>
+                                                <div class="sk-rect3"></div>
+                                                <div class="sk-rect4"></div>
+                                                <div class="sk-rect5"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div ng-if="totalParkedCar == 0  && !loading" class="widthheigh">
+                                        <p class="text-muted text-center">{{nocarfound}}</p>
+                                    </div>
+                                    <div class="text-center"
+                                        ng-if="totalParkedCar != filteredParkedCar.length && totalParkedCar > filteredParkedCar.length">
+                                        <button class="btn btn-default" ng-if="!loading"
+                                            ng-click="loadMoreCar(filteredParkedCar.length, 'parked', searchCars2)">Load
+                                            more
+                                            <span class="loading"></span>
+                                        </button>
+                                    </div>
+                                    <div ng-if="loadingScrollBusy" class="widthheigh">
+                                        <br>
+                                        <br>
+                                        <div class="spiner-example spinner-padding">
+                                            <div class="sk-spinner sk-spinner-three-bounce">
+                                                <div class="sk-bounce1"></div>
+                                                <div class="sk-bounce2"></div>
+                                                <div class="sk-bounce3"></div>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Requested Car ({{totalRequestedCar}})" select="remember(1)" active="activeTabs[1]"
+                        ng-click="focusFun();"
+                        ng-hide="$user.role!='accountadmin' && !$user.venues[0].settings.requestCar">
+                        <div class="panel-body">
+                            <div class="wrapper p-t-15 p-l-0 p-r-0 wrapper-content animated fadeInRight">
+                                <div ng-if="gridView1">
+                                    <!--   infinite-scroll='loadMoreCar(filteredRequestedCar.length, "requested", searchCars2)' infinite-scroll-immediate-check="false" infinite-scroll-disabled='loadingScrollBusy'  -->
+                                    <div class="col-lg-12 padding-0">
+                                        <div class="col-lg-4"
+                                            ng-repeat="requested in filteredRequestedCar track by $index"
+                                            ng-if="requested.status!='completed'">
+                                            <div class="contact-box padding-10" ng-click="listParkedDetails(requested)"
+                                                ng-style="(requested.status=='requested' && !requested.log[1].specialRequest.accepted) && {'border': 'solid 3px #e42012'} || requested.status=='accept' && {'border': 'solid 3px #ffc900', 'padding-bottom': '24px' } || requested.status=='completed' && {'border': 'solid 3px black'} || (requested.status=='requested' && requested.log[1].specialRequest.accepted) &&  {'border':'solid 3px #fb6c10'} || (requested.status=='ready') && {'border':'solid 3px green' , 'padding-bottom': '24px'} ">
+                                                <div class="row">
+                                                    <div class="col-lg-3">
+                                                        <div class="text-center">
+                                                            <img class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-if="!requested.log[requested.log.length-1].userProfile"
+                                                                src="img/unknown.png">
+                                                            <img ng-if="requested.log[requested.log.length-1].userProfile"
+                                                                class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-src='{{ipAddress}}/images/{{requested.log[requested.log.length-1].userProfile}}'
+                                                                on-error-src-user />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-5">
+                                                        <h5 class="allcaps text-inline" style="max-width: 125%;">
+                                                            <strong>{{requested.parkingID}} &nbsp;&mdash;&nbsp;
+                                                                {{requested.plateNumber}}</strong>
+                                                        </h5>
+                                                        <br>
+                                                        <p class="text-inline" style="max-width: 125%;">
+                                                            <i class="fa fa-map-marker"></i> {{requested.parkingZone}}
+                                                            <span ng-show="$user.role=='admin'"> //
+                                                                {{requested.accountID.accountName | capitalize}} </span>
+                                                            <span
+                                                                ng-show="$user.role=='accountadmin' || $user.role=='manager'">
+                                                                // {{requested.venue.venueName | capitalize}} </span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <!-- <div ng-if="requested.status=='requested'">
+                                                        <button ng-if="$user.role!='driver'" class="btn btn-xs btn-success" ng-click="stopEventFunction($event);openModal($event,requested)">
+                                                            Accept
+                                                        </button>
+                                                        <button ng-if="$user.role=='driver'" class="btn btn-xs btn-success" ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)">
+                                                            Accept
+                                                        </button>
+                                                    </div>     ng-if="requested.status=='accept'"           -->
+                                                        <div>
+                                                            <button
+                                                                ng-if="$user.role!='driver' && requested.status=='requested'"
+                                                                class="btn btn-xs btn-block btn-success"
+                                                                ng-click="stopEventFunction($event);openAcceptModal($event,requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                Accept
+                                                            </button>
+                                                            <button
+                                                                ng-if="$user.role=='driver' && requested.status=='requested'"
+                                                                class="btn btn-xs btn-block btn-success"
+                                                                ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                Accept
+                                                            </button>
+                                                            <!-- <button ng-if="$user.role!='driver' " class="btn btn-xs btn-success" ng-click="stopEventFunction($event);openModal($event,requested)">
+                                                            Complete
+                                                        </button>
+                                                        <button ng-if="$user.role=='driver'" class="btn btn-xs btn-success" ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)">
+                                                            Complete
+                                                        </button> -->
+                                                            <button class="btn btn-xs btn-success btn-block"
+                                                                ng-if=" (requested.status=='requested' || requested.status=='accept')"
+                                                                ng-click="stopEventFunction($event);readyState(requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                For Pickup
+                                                            </button>
+                                                            <button class="btn btn-xs btn-success btn-block"
+                                                                ng-click="stopEventFunction($event);opencompleteModal($event, requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                Complete
+                                                            </button>
+                                                        </div>
+                                                        <!-- <div class="m-t-100-p" uib-dropdown>
+                                                        <a class="count-info p-xs" href uib-dropdown-toggle ng-click="stopEventFunction($event);">
+                                                            <i class="fa fa-ellipsis-v fa-lg"></i>
+                                                        </a>
+                                                        <ul class="dro && !loadingpdown-menu-left" role="menu" uib-dropdown-menu="" ng-if="requested.status=='requested'">
+                                                            <li ng-if="$user.role!='driver'">
+                                                                <a href="" ng-click="stopEventFunction($event);openModal($event,requested)">Accept</a>
+                                                            </li>
+                                                            <li ng-if="$user.role=='driver'">
+                                                                <a href="" ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)">Accept</a>
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="dropdown-menu-left" role="menu" uib-dropdown-menu="" ng-if="requested.status=='accept'">
+                                                            <li ng-if="$user.role!='driver'">
+                                                                <a href="" ng-click="stopEventFunction($event);openModal($event,requested)">Complete</a>
+                                                            </li>
+                                                            <li ng-if="$user.role=='driver'">
+                                                                <a href="" ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)">Complete</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div> -->
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12 text-center">
+                                                    <h4 class="m-t-0 m-b-0">
+                                                        <strong ng-if="requested.status=='accept'">ON THE WAY</strong>
+                                                        <strong ng-if="requested.status=='requested'">REQUESTED</strong>
+                                                        <strong ng-if="requested.status=='ready'">READY TO
+                                                            PICK-UP</strong>
+                                                    </h4>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div ng-if="loading" class="widthheigh">
+                                            <div class="spiner-example">
+                                                <div class="sk-spinner sk-spinner-wave">
+                                                    <div class="sk-rect1"></div>
+                                                    <div class="sk-rect2"></div>
+                                                    <div class="sk-rect3"></div>
+                                                    <div class="sk-rect4"></div>
+                                                    <div class="sk-rect5"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-if="totalRequestedCar == 0  && !loading">
+                                            <p class="text-muted text-center">{{nocarfound}}</p>
+                                        </div>
+                                        <div class="text-center"
+                                            ng-if="totalRequestedCar != filteredRequestedCar.length && totalRequestedCar > filteredRequestedCar.length">
+                                            <button class="btn btn-default" ng-if="!loading"
+                                                ng-click="loadMoreCar(filteredRequestedCar.length, 'requested', searchCars2);">Load
+                                                more
+                                                <span class="loading"></span>
+                                            </button>
+                                        </div>
+                                        <div ng-if="loadingScrollBusy" class="widthheigh">
+                                            <br>
+                                            <br>
+                                            <div class="spiner-example spinner-padding">
+                                                <div class="sk-spinner sk-spinner-three-bounce">
+                                                    <div class="sk-bounce1"></div>
+                                                    <div class="sk-bounce2"></div>
+                                                    <div class="sk-bounce3"></div>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div ng-if="tableView1">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Ticket Number</th>
+                                                <th>Plate Number</th>
+                                                <th>Parking Zone</th>
+                                                <th>Status</th>
+                                                <th>Car Model</th>
+                                                <th>Car Colour</th>
+                                                <th>CVA - In </th>
+                                                <th>Time In</th>
+                                                <th>Fees</th>
+                                                <th>Duration</th>
+                                                <th>More Information</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="requested in filteredRequestedCar track by $index">
+                                                <td class="all-caps">{{requested.parkingID}}
+                                                    <h4 class="m-t-0 m-b-0">
+                                                        <strong ng-if="requested.status=='accept'">ON THE WAY</strong>
+                                                        <strong ng-if="requested.status=='requested'">REQUESTED</strong>
+                                                        <strong ng-if="requested.status=='ready'">READY TO
+                                                            PICK-UP</strong>
+                                                    </h4>
+                                                </td>
+                                                <td class="all-caps">{{requested.plateNumber}}</td>
+                                                <td>{{ requested.parkingZone | capitalize}}
+
+                                                    <span ng-show="$user.role=='admin'">
+                                                        //  <i class="fa fa-map-marker"></i>
+                                                        {{requested.accountID.accountName - requested.parkingID | capitalize}}
+                                                    </span>
+                                                    <span
+                                                        ng-show="$user.role=='accountadmin' || $user.role=='manager'">
+                                                        //  <i class="fa fa-map-marker"></i> {{requested.venue.venueName | capitalize}}</span>
+
+                                                </td>
+                                                <td style="width: 100px;" ng-style="(requested.status=='requested' && !requested.log[1].specialRequest.accepted) && {'background': '#e42012'} || requested.status=='accept' && {'background': '#ffc900', 'padding-bottom': '24px' } || requested.status=='completed' && {'background': 'black'} || (requested.status=='requested' && requested.log[1].specialRequest.accepted) &&  {'background':'#fb6c10'} || (requested.status=='ready') && {'background':'green' , 'padding-bottom': '24px'} "></td>
+                                                <td>{{ requested.brand | allUpperCase}}</td>
+                                                <td>{{ requested.color | allUpperCase}}</td>
+                                                <td>{{requested.log[requested.log.length-1].employeeName | capitalize}}
+                                                </td>
+                                                <td>{{ requested.createdAt | date : 'dd MMM yyyy'}} {{ requested.createdAt | date : 'HH:mm'}}</td>
+                                                <td>{{requested.fees}}</td>
+                                                <td>
+                                                    <span
+                                                        ng-if="requested.feeSplitUp && requested.feeSplitUp.duration">{{requested.feeSplitUp.duration}}</span>
+                                                    <span
+                                                        ng-if="!requested.feeSplitUp && !requested.feeSplitUp.duration">{{ calculateDuration(requested.createdAt, requested.updatedAt)}}</span>
+                                                </td>
+                                                <td class="text-center" width="150px">
+                                                    <button class="btn btn-xs btn-default"
+                                                        ng-click="listParkedDetails(requested)"
+                                                        >
+                                                        View
+                                                    </button>
+                                                    <button
+                                                                ng-if="$user.role!='driver' && requested.status=='requested'"
+                                                                class="btn btn-xs btn-block btn-success"
+                                                                ng-click="stopEventFunction($event);openAcceptModal($event,requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                Accept
+                                                            </button>
+                                                            <button
+                                                                ng-if="$user.role=='driver' && requested.status=='requested'"
+                                                                class="btn btn-xs btn-block btn-success"
+                                                                ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                Accept
+                                                            </button>
+                                                            <button class="btn btn-xs btn-success btn-block"
+                                                                ng-if=" (requested.status=='requested' || requested.status=='accept')"
+                                                                ng-click="stopEventFunction($event);readyState(requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                For Pickup
+                                                            </button>
+                                                            <button class="btn btn-xs btn-success btn-block"
+                                                                ng-click="stopEventFunction($event);opencompleteModal($event, requested)"
+                                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                                Complete
+                                                            </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="widthheigh" ng-if="loading">
+                                        <div class="spiner-example">
+                                            <div class="sk-spinner sk-spinner-wave">
+                                                <div class="sk-rect1"></div>
+                                                <div class="sk-rect2"></div>
+                                                <div class="sk-rect3"></div>
+                                                <div class="sk-rect4"></div>
+                                                <div class="sk-rect5"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div ng-if="totalRequestedCar == 0  && !loading" class="widthheigh">
+                                        <p class="text-muted text-center">{{nocarfound}}</p>
+                                    </div>
+                                    <div class="text-center"
+                                        ng-if="totalRequestedCar != filteredRequestedCar.length && totalRequestedCar > filteredRequestedCar.length">
+                                        <button class="btn btn-default" ng-if="!loading"
+                                            ng-click="loadMoreCar(filteredRequestedCar.length, 'requested', searchCars2)">Load
+                                            more
+                                            <span class="loading"></span>
+                                        </button>
+                                    </div>
+                                    <div ng-if="loadingScrollBusy" class="widthheigh">
+                                        <br>
+                                        <br>
+                                        <div class="spiner-example spinner-padding">
+                                            <div class="sk-spinner sk-spinner-three-bounce">
+                                                <div class="sk-bounce1"></div>
+                                                <div class="sk-bounce2"></div>
+                                                <div class="sk-bounce3"></div>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                    <uib-tab heading="Completed Car (Today) ({{totalCompletedCar}})" ng-if="$user.role!='admin'"
+                        select="remember(2)" active="activeTabs[2]" ng-click="focusFun();completeCarView()">
+                        <div class="panel-body">
+                            <div
+                                class="wrapper p-t-15 p-l-0 p-r-0 wrapper-content animated fadeInRight full-height-scroll">
+                                <div>
+                                    <div ng-if="gridView" class="col-lg-12 padding-0">
+                                        <div class="col-lg-4"
+                                            ng-repeat="requested in filteredCompletedCar track by $index">
+                                            <div class="contact-box padding-10" ng-click="singleReportDetail(requested)"
+                                                ng-style=" requested.status && {'border': 'solid 3px green'}"
+                                                ui-sref="app.reportCarDetails">
+                                                <div class="row">
+                                                    <div class="col-lg-3">
+                                                        <div class="text-center">
+                                                            <img class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-if="!requested.log[requested.log.length-1].userProfile"
+                                                                src="img/unknown.png">
+                                                            <img ng-if="requested.log[requested.log.length-1].userProfile"
+                                                                class="img-circle m-t-xs" width="50px" height="50px"
+                                                                ng-src='{{ipAddress}}/images/{{requested.log[requested.log.length-1].userProfile}}'
+                                                                on-error-src-user />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-5">
+                                                        <h5 class="allcaps text-inline" style="max-width: 130%;">
+                                                            <strong>{{requested.parkingID}} &nbsp;&mdash;&nbsp;
+                                                                {{requested.plateNumber}}</strong>
+                                                        </h5>
+                                                        <br>
+                                                        <p class="text-inline" style="max-width: 130%;">
+                                                            <i class="fa fa-map-marker"></i> {{requested.parkingZone}}
+                                                            <span ng-show="$user.role=='admin'"> //
+                                                                {{requested.accountID.accountName | capitalize}} </span>
+                                                            <span
+                                                                ng-show="$user.role=='accountadmin' || $user.role=='manager'">
+                                                                // {{requested.venue.venueName | capitalize}} </span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-lg-4"
+                                                        ng-if="!requested.free && checkCompletedHoursLessthanDefinedHour(requested)">
+                                                        <button class="btn btn-xs btn-success btn-block"
+                                                            id="IDrevalidate{{requested.parkingID}}"
+                                                            ng-click="openRevalidateModal(requested);stopEventFunction($event);"
+                                                            ng-if="!requested.newfeeSplitUp && ($user.role == 'accountadmin' || $user.revalidate) && requested.venue.settings.verifyOption">
+                                                            Revalidate
+                                                        </button>
+                                                    </div>
+                                                    <h5 class="all-caps" style="position: absolute;right: 28px;">
+                                                        <strong ng-if="requested.amountPaid">Paid</strong>
+                                                        </h4>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div class="widthheigh" ng-if="loading">
+                                            <div class="spiner-example">
+                                                <div class="sk-spinner sk-spinner-wave">
+                                                    <div class="sk-rect1"></div>
+                                                    <div class="sk-rect2"></div>
+                                                    <div class="sk-rect3"></div>
+                                                    <div class="sk-rect4"></div>
+                                                    <div class="sk-rect5"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-if="totalCompletedCar == 0  && !loading" class="widthheigh">
+                                            <p class="text-muted text-center">{{nocarfound}}</p>
+                                        </div>
+                                        <div class="text-center"
+                                            ng-if="totalCompletedCar != filteredCompletedCar.length && totalCompletedCar > filteredCompletedCar.length">
+                                            <button class="btn btn-default" ng-if="!loading"
+                                                ng-click="loadMoreCar(filteredCompletedCar.length, 'complete', searchCars2)">Load
+                                                more
+                                                <span class="loading"></span>
+                                            </button>
+                                        </div>
+                                        <div ng-if="loadingScrollBusy" class="widthheigh">
+                                            <br>
+                                            <br>
+                                            <div class="spiner-example spinner-padding">
+                                                <div class="sk-spinner sk-spinner-three-bounce">
+                                                    <div class="sk-bounce1"></div>
+                                                    <div class="sk-bounce2"></div>
+                                                    <div class="sk-bounce3"></div>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <br>
+                                        </div>
+                                    </div>
+                                    <div ng-if="tableView">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ticket Number</th>
+                                                    <th>CVA - Out </th>
+                                                    <th>Time Out</th>
+                                                    <th>Fees</th>
+                                                    <th>Plate Number</th>
+                                                    <th>Duration</th> 
+                                                    <th>Camera Capture</th>
+                                                    <th>More Information</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="requested in filteredCompletedCar track by $index">
+                                                    <td class="all-caps">{{requested.parkingID}}</td>
+                                                    <td>{{requested.log[requested.log.length-1].employeeName | capitalize}}
+                                                    </td>
+                                                    <td>{{requested.log[requested.log.length-1].at | date:'h:mm'}}</td>
+                                                    <td>{{requested.fees}}</td>
+                                                    <td class="all-caps">{{requested.plateNumber}}</td>
+                                                    <td>
+                                                        <span
+                                                            ng-if="requested.feeSplitUp && requested.feeSplitUp.duration">{{requested.feeSplitUp.duration}}</span>
+                                                        <span
+                                                            ng-if="!requested.feeSplitUp && !requested.feeSplitUp.duration">{{ calculateDuration(requested.createdAt, requested.updatedAt)}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span ng-repeat="imgg in requested.scratchesSnap">
+                                                            <a href="{{ipAddress}}/images/{{imgg}}" target="_blank">{{imgg}}</a>
+                                                        </span>
+                                                        <span ng-if="report.snap !== 'noImage'">
+                                                            <a href="{{ipAddress}}/images/{{report.snap}}" target="_blank">{{report.snap}}</a>
+                                                        </span>
+                                                        <span ng-repeat="docs in report.documents">
+                                                            <a href="{{ipAddress}}/images/{{docs}}" target="_blank">{{docs}}</a>
+                                                        </span>
+                                                        
+                                                    </td>
+                                                    <td class="text-center" width="150px">
+                                                        <button class="btn btn-xs btn-default"
+                                                            ng-click="singleReportDetail(requested)"
+                                                            ui-sref="app.reportCarDetails">
+                                                            View
+                                                        </button>
+                                                        <span
+                                                            ng-if="!requested.free && checkCompletedHoursLessthanDefinedHour(requested)">
+                                                            <button class="btn btn-xs btn-success"
+                                                                id="IDrevalidate{{requested.parkingID}}"
+                                                                ng-click="openRevalidateModal(requested);stopEventFunction($event);"
+                                                                ng-if="!requested.newfeeSplitUp && ($user.role == 'accountadmin' || $user.revalidate)  && requested.venue.settings.verifyOption">
+                                                                Revalidate
+                                                            </button>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="widthheigh" ng-if="loading">
+                                            <div class="spiner-example">
+                                                <div class="sk-spinner sk-spinner-wave">
+                                                    <div class="sk-rect1"></div>
+                                                    <div class="sk-rect2"></div>
+                                                    <div class="sk-rect3"></div>
+                                                    <div class="sk-rect4"></div>
+                                                    <div class="sk-rect5"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-if="totalCompletedCar == 0  && !loading" class="widthheigh">
+                                            <p class="text-muted text-center">{{nocarfound}}</p>
+                                        </div>
+                                        <div class="text-center"
+                                            ng-if="totalCompletedCar != filteredCompletedCar.length && totalCompletedCar > filteredCompletedCar.length">
+                                            <button class="btn btn-default" ng-if="!loading"
+                                                ng-click="loadMoreCar(filteredCompletedCar.length, 'complete', searchCars2)">Load
+                                                more
+                                                <span class="loading"></span>
+                                            </button>
+                                        </div>
+                                        <div ng-if="loadingScrollBusy" class="widthheigh">
+                                            <br>
+                                            <br>
+                                            <div class="spiner-example spinner-padding">
+                                                <div class="sk-spinner sk-spinner-three-bounce">
+                                                    <div class="sk-bounce1"></div>
+                                                    <div class="sk-bounce2"></div>
+                                                    <div class="sk-bounce3"></div>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </uib-tab>
+                </uib-tabset>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-4 padding-0">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Parked Car ({{totalParkedCar}})</h3>
+                    <div class="col-lg-12 padding-0" ng-repeat="parked in filteredParkedCar track by $index">
+                        <div class="contact-box padding-10" ng-click="listParkedDetails(parked)" ng-style="parked.status=='parked' && {'border': 'solid 3px #055aa5'}"
+                            style="height:103px;">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <div class="text-center">
+                                        <img class="img-circle m-t-xs" width="50px" height="50px" ng-if="parked.log[0].userProfile" class="img-avatar margintop5"
+                                            ng-src="{{parked.log[parked.log.length -1].userProfile}}" on-error-src-driver/>
+                                        <img class="img-circle m-t-xs" width="50px" height="50px" ng-if="!parked.employeeID.profileImage && parked.log[0].by != 'Unassigned' && !parked.log[parked.log.length -1].userProfile && parked.log[0].by != null"
+                                            src="img/unknown.png">
+                                        <img class="img-circle m-t-xs" width="50px" height="50px" ng-if="parked.log[0].by == 'Unassigned' || parked.log[0].by == null"
+                                            ng-click="stopEventFunction($event);driverUpdateModalOpen(parked);" src="img/question_user.jpg ">
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <h5 class="allcaps text-inline" style="max-width: 125%;">
+                                        <strong>{{parked.parkingID}} &nbsp;&mdash;&nbsp; {{parked.plateNumber}}</strong>
+                                    </h5>
+                                    <br>
+                                    <p class="text-inline m-b-0" style="max-width: 125%;">
+                                        <i class="fa fa-map-marker"></i> {{parked.parkingZone}}
+                                        <span ng-show="$user.role=='admin'">
+                                            // {{parked.accountID.accountName - parked.parkingID | capitalize}} </span>
+                                        <span ng-show="$user.role=='accountadmin' || $user.role=='manager'"> // {{parked.venue.venueName | capitalize}}</span>
+                                    </p>
+                                </div>
+                                <div class="col-lg-4">
+                                    <button class="btn btn-xs btn-success btn-block" id="ID{{parked.parkingID}}" ng-click="stopEventFunction($event);requestCarByUser(parked);"
+                                        ng-if="parked.free">
+                                        Request
+                                    </button>
+                                    <button class="btn btn-xs btn-success btn-block" ng-click="stopEventFunction($event);openCompleteModal($event,parked)" ng-if="parked.free">
+                                        Complete
+                                    </button>
+                                    <button class="btn btn-xs btn-success btn-block" id="ID{{parked.parkingID}}" ng-click="openVerifyModal(parked);stopEventFunction($event);"
+                                        ng-if="!parked.free">
+                                        Verify
+                                    </button>
+                                    <button class="btn btn-xs btn-success btn-block" ng-click="editCar(parked);stopEventFunction($event);">
+                                        Edit
+                                    </button>                                   
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <h4 class="all-caps">
+                                        <strong ng-if="parked.validatedBy">Validated</strong>
+                                    </h4>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div ng-if="totalParkedCar == 0 && !loading" class="widthheigh">
+                        <p class="text-muted text-center">{{nocarfound}}</p>
+                    </div>
+                    <div ng-if="loading" class="widthheigh">
+                        <div class="spiner-example">
+                            <div class="sk-spinner sk-spinner-wave">
+                                <div class="sk-rect1"></div>
+                                <div class="sk-rect2"></div>
+                                <div class="sk-rect3"></div>
+                                <div class="sk-rect4"></div>
+                                <div class="sk-rect5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 padding-0">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Requested Car ({{totalRequestedCar}})"</h3>
+                        <div class="col-lg-12 padding-0" ng-repeat="requested in filteredRequestedCar track by $index" ng-if="requested.status!='completed'">
+                            <div class="contact-box padding-10" ng-click="listParkedDetails(requested)" ng-style="(requested.status=='requested' && !requested.log[1].specialRequest.accepted) && {'border': 'solid 3px #e42012'} || requested.status=='accept' && {'border': 'solid 3px #ffc900'}  || requested.status=='completed' && {'border': 'solid 3px black'} || (requested.status=='requested' && requested.log[1].specialRequest.accepted) &&  {'border':'solid 3px #fb6c10'}">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <div class="text-center">
+                                            <img class="img-circle m-t-xs" width="50px" height="50px" ng-if="!requested.log[requested.log.length-1].userProfile" src="img/unknown.png">
+                                            <img ng-if="requested.log[requested.log.length-1].userProfile" class="img-circle m-t-xs" width="50px" height="50px" ng-src='{{ipAddress}}/images/{{requested.log[requested.log.length-1].userProfile}}'
+                                                on-error-src-user/>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <h5 class="allcaps text-inline" style="max-width: 125%;">
+                                            <strong>{{requested.parkingID}} &nbsp;&mdash;&nbsp; {{requested.plateNumber}}</strong>
+                                        </h5>
+                                        <br>
+                                        <p class="text-inline" style="max-width: 125%;">
+                                            <i class="fa fa-map-marker"></i> {{requested.parkingZone}}
+                                            <span ng-show="$user.role=='admin'"> // {{requested.accountID.accountName | capitalize}} </span>
+                                            <span ng-show="$user.role=='accountadmin' || $user.role=='manager'"> // {{requested.venue.venueName | capitalize}} </span>
+                                        </p>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <button ng-if="$user.role!='driver' && requested.status=='requested'" class="btn btn-xs btn-block btn-success" ng-click="stopEventFunction($event);openAcceptModal($event,requested)"
+                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                Accept
+                                            </button>
+                                            <button ng-if="$user.role=='driver' && requested.status=='requested'" class="btn btn-xs btn-block btn-success" ng-click="stopEventFunction($event);showActionsheetforDriverOnly(requested)"
+                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                Accept
+                                            </button>
+                                            <button class="btn btn-xs btn-success btn-block" ng-click="stopEventFunction($event);opencompleteModal($event, requested)"
+                                                id="ID{{requested.status}}{{requested.parkingID}}">
+                                                Complete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <h4 class="m-t-0 m-b-0">
+                                        <strong ng-if="requested.status=='accept'">ON THE WAY</strong>
+                                        <strong ng-if="requested.status=='requested'">REQUESTED</strong>
+                                    </h4>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div ng-if="loading" class="widthheigh">
+                            <div class="spiner-example">
+                                <div class="sk-spinner sk-spinner-wave">
+                                    <div class="sk-rect1"></div>
+                                    <div class="sk-rect2"></div>
+                                    <div class="sk-rect3"></div>
+                                    <div class="sk-rect4"></div>
+                                    <div class="sk-rect5"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-if="totalRequestedCar == 0  && !loading">
+                            <p class="text-muted text-center">{{nocarfound}}</p>
+                        </div>
+                        <div class="text-center" ng-if="totalRequestedCar != filteredRequestedCar.length && totalRequestedCar > filteredRequestedCar.length">
+                            <button class="btn btn-default" ng-if="!loading" ng-click="loadMoreCar(filteredRequestedCar.length, 'requested', searchCars2);">Load more
+                                <span class="loading"></span>
+                            </button>
+                        </div>
+                        <div ng-if="loadingScrollBusy" class="widthheigh">
+                            <br>
+                            <br>
+                            <div class="spiner-example spinner-padding">
+                                <div class="sk-spinner sk-spinner-three-bounce">
+                                    <div class="sk-bounce1"></div>
+                                    <div class="sk-bounce2"></div>
+                                    <div class="sk-bounce3"></div>
+                                </div>
+                            </div>
+                            <br>
+                            <br>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 padding-0">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Completed Car (Today) ({{totalCompletedCar}})"</h3>
+                    <div class="col-lg-12 padding-0" ng-repeat="requested in filteredCompletedCar track by $index">
+                        <div class="contact-box padding-10" ng-click="singleReportDetail(requested)" ng-style=" requested.status && {'border': 'solid 3px green'}"
+                            ui-sref="app.reportCarDetails">
+                            <div class="row">
+                                <div class="col-lg-3">
+                                    <div class="text-center">
+                                        <img class="img-circle m-t-xs" width="50px" height="50px" ng-if="!requested.log[requested.log.length-1].userProfile" src="img/unknown.png">
+                                        <img ng-if="requested.log[requested.log.length-1].userProfile" class="img-circle m-t-xs" width="50px" height="50px" ng-src='{{ipAddress}}/images/{{requested.log[requested.log.length-1].userProfile}}'
+                                            on-error-src-user/>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <h5 class="allcaps text-inline" style="max-width: 130%;">
+                                        <strong>{{requested.parkingID}} &nbsp;&mdash;&nbsp; {{requested.plateNumber}}</strong>
+                                    </h5>
+                                    <br>
+                                    <p class="text-inline" style="max-width: 130%;">
+                                        <i class="fa fa-map-marker"></i> {{requested.parkingZone}}
+                                        <span ng-show="$user.role=='admin'"> // {{requested.accountID.accountName | capitalize}} </span>
+                                        <span ng-show="$user.role=='accountadmin' || $user.role=='manager'"> // {{requested.venue.venueName | capitalize}} </span>
+                                    </p>
+                                </div>
+                                <div class="col-lg-4" ng-if="!requested.free && checkCompletedHoursLessthanDefinedHour(requested)">
+                                    <button class="btn btn-xs btn-success btn-block" id="IDrevalidate{{requested.parkingID}}" ng-click="openRevalidateModal(requested);stopEventFunction($event);"
+                                        ng-if="!requested.newfeeSplitUp && ($user.role == 'accountadmin' || $user.revalidate)">
+                                        Revalidate
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="widthheigh" ng-if="loading">
+                        <div class="spiner-example">
+                            <div class="sk-spinner sk-spinner-wave">
+                                <div class="sk-rect1"></div>
+                                <div class="sk-rect2"></div>
+                                <div class="sk-rect3"></div>
+                                <div class="sk-rect4"></div>
+                                <div class="sk-rect5"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="totalCompletedCar == 0  && !loading" class="widthheigh">
+                        <p class="text-muted text-center">{{nocarfound}}</p>
+                    </div>
+                    <div class="text-center" ng-if="totalCompletedCar != filteredCompletedCar.length && totalCompletedCar > filteredCompletedCar.length">
+                        <button class="btn btn-default" ng-if="!loading" ng-click="loadMoreCar(filteredCompletedCar.length, 'complete', searchCars2)">Load more
+                            <span class="loading"></span>
+                        </button>
+                    </div>
+                    <div ng-if="loadingScrollBusy" class="widthheigh">
+                        <br>
+                        <br>
+                        <div class="spiner-example spinner-padding">
+                            <div class="sk-spinner sk-spinner-three-bounce">
+                                <div class="sk-bounce1"></div>
+                                <div class="sk-bounce2"></div>
+                                <div class="sk-bounce3"></div>
+                            </div>
+                        </div>
+                        <br>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+<div class="modal animated fadeInRight" id="driverUpdate" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form role="form">
+                            <h3>
+                                <strong>Parking Duration</strong>
+                            </h3>
+                            <ul class="list-group clear-list">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right"> {{carData.parkingID}} </span>
+                                            <strong>Ticket Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'dd-MM-yyyy'}} </span>
+                                            <strong>Park Date</strong>
+                                        </li>
+                                        <li class="list-group-item" ng-if="carData.duration">
+                                            <span class="pull-right"> {{carData.duration}} </span>
+                                            <strong>Total Duration</strong>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right all-caps"> {{carData.plateNumber}} </span>
+                                            <strong>Plate Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'HH:mm'}} </span>
+                                            <strong>Park Time</strong>
+                                        </li>
+                                    </div>
+                                </div>
+                            </ul>
+                            <div class="form-group">
+                                <label>Select Driver</label>
+                                <select class="form-control" ng-model="selectedDriver.driver"
+                                    ng-options="driver as driver.userName  for driver in accountDrivers track by driver.id"
+                                    id="driverAssign">
+                                    <option value="" hidden> Select Driver </option>
+                                </select>
+                            </div>
+                            <div class="text-right">
+                                <button class="btn btn-success"
+                                    ng-click="updateDriverforPark($parent.carData, selectedDriver.driver);"
+                                    id="driverAssignBtn">
+                                    Parked
+                                </button>
+                                <button type="button" class="btn btn-default" ng-click="close()">
+                                    Close
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="acceptModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form role="form">
+                            <h3>
+                                <strong>Parking Duration</strong>
+                            </h3>
+                            <ul class="list-group clear-list">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right"> {{carData.parkingID}} </span>
+                                            <strong>Ticket Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'dd-MM-yyyy'}} </span>
+                                            <strong>Park Date</strong>
+                                        </li>
+                                        <li class="list-group-item" ng-if="carData.duration">
+                                            <span class="pull-right"> {{carData.duration}} </span>
+                                            <strong>Total Duration</strong>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right all-caps">
+                                                {{carData.otherInfo ? carData.otherInfo.plateNumber : carData.plateNumber}}
+                                            </span>
+                                            <strong>Plate Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'HH:mm'}} </span>
+                                            <strong>Park Time</strong>
+                                        </li>
+                                    </div>
+                                </div>
+                            </ul>
+                            <div class="form-group" ng-controller="accountCtrl" ng-if="$user.role != 'driver'">
+                                <label>Select Driver</label>
+                                <select class="form-control" ng-model="selectedDriver.driver"
+                                    ng-options="driver as driver.userName for driver in accountDrivers track by driver.id"
+                                    id="acceptDriver">
+                                    <option value="" hidden> Select Driver </option>
+                                </select>
+                            </div>
+                            <div class="text-right" ng-if="$parent.carData.status=='requested'">
+                                <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                                <button type="button" class="btn btn-success"
+                                    ng-click="acceptCar($parent.carData, selectedDriver.driver);"
+                                    ng-if="!$parent.carData.log[$parent.carData.log.length-1].specialRequest || $parent.carData.log[$parent.carData.log.length-1].specialRequest.accepted"
+                                    id="acceptBtn">
+                                    Accept
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="completeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form role="form">
+                            <h3>
+                                <strong>Parking Duration</strong>
+                            </h3>
+                            <ul class="list-group clear-list">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right"> {{carData.parkingID}} </span>
+                                            <strong>Ticket Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'dd-MM-yyyy'}} </span>
+                                            <strong>Park Date</strong>
+                                        </li>
+                                        <li class="list-group-item" ng-if="carData.duration">
+                                            <span class="pull-right"> {{carData.duration}} </span>
+                                            <strong>Total Duration</strong>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right all-caps">
+                                                {{carData.otherInfo ? carData.otherInfo.plateNumber : carData.plateNumber}}
+                                            </span>
+                                            <strong>Plate Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'HH:mm'}} </span>
+                                            <strong>Park Time</strong>
+                                        </li>
+                                    </div>
+                                </div>
+                            </ul>
+                            <div class="form-group" ng-controller="accountCtrl" ng-if="$user.role != 'driver'">
+                                <label>Select Driver</label>
+                                <select class="form-control" ng-model="selectedDriver.driver"
+                                    ng-options="driver as driver.userName for driver in accountDrivers track by driver.id"
+                                    id="finalCompleteDriver">
+                                    <option value="" hidden> Select Driver </option>
+                                </select>
+                            </div>
+                            <div class="row" ng-if="carData.feeSplitUp">
+                                <div class="col-lg-12">
+                                    <p class="fist-item font-bold alert alert-success m-b-sm">
+                                        <span class="pull-right"> {{carData.feeSplitUp.duration}} </span>
+                                        <strong>Parked Duration</strong>
+                                    </p>
+                                </div>
+                            </div>
+                            <div ng-if="carData.validatedBy || carData.cashAcceptedBy">
+                                <ul class="list-group clear-list">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <li class="list-group-item fist-item">
+                                                <span class="pull-right"> {{carData.validatedBy.userName | capitalize}}
+                                                </span> <strong>Validated By</strong>
+                                            </li>
+                                            <li class="list-group-item fist-item">
+                                                <span class="pull-right">
+                                                    {{carData.validatedAt | date:'dd-MM-yyyy  HH:mm'}} </span>
+                                                <strong>Validated At</strong>
+                                            </li>
+                                            <li class="list-group-item fist-item">
+                                                <span class="pull-right">
+                                                    {{carData.cashAcceptedBy.userName | capitalize}} </span> <strong>Fee
+                                                    collected By</strong>
+                                            </li>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <li class="list-group-item fist-item">
+                                                <span class="pull-right">
+                                                    {{carData.validatedBy.validationType | capitalize}} </span>
+                                                <strong>Validated Type</strong>
+                                            </li>
+                                            <li class="list-group-item fist-item">
+                                                <span class="pull-right">
+                                                    {{carData.validatedBy.outletName | capitalize}} </span>
+                                                <strong>Outlet Name</strong>
+                                            </li>
+                                            <li class="list-group-item fist-item">
+                                                <span class="pull-right">
+                                                    {{carData.cashAcceptedAt | date:'dd-MM-yyyy  HH:mm'}} </span>
+                                                <strong>Fee collected At</strong>
+                                            </li>
+                                        </div>
+                                    </div>
+                                    <li class="list-group-item text-danger" ng-if="!carData.free">
+                                        <span class="pull-right">
+                                            <h3 class="m-t-0"><strong>AED {{carData.fees}}</strong></h3>
+                                        </span>
+                                        <h3><strong>Total Amount</strong></h3>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="checkbox checkbox-info checkbox-circle">
+                                    <input id="checkbox9" type="checkbox" ng-model="$parent.missed"
+                                        ng-value="$parent.missed">
+                                    <label for="checkbox9">
+                                        Oscar card missed
+                                    </label>
+                                </div>
+                                <div class="form-group" ng-if="$parent.missed">
+                                    <label>Guest</label>
+                                    <input type="text" class="form-control" ng-model="$parent.missedProofs.name"
+                                        placeholder="Guest Name" name="customkerName" id="cmpGuestName">
+                                </div>
+                                <div class="form-group" ng-if="$parent.missed">
+                                    <label>Mobile Number</label>
+                                    <input type="text" class="form-control" ng-model="$parent.missedProofs.mobile"
+                                        placeholder="Mobile Number" name="mobile" id="cmpMobileNumber">
+                                </div>
+                                <div class="col-lg-12 fees_cal_card"
+                                    ng-if="carData.venue.settings && carData.venue.settings.initialBillPrint">
+                                    <div class="col-lg-12 padding-0">
+                                        <span style="display:none;">
+                                            {{ carData.fees = ( carData.customerType.toLowerCase() === 'vip'  &&  carData.venue.id === '5ccee033b7765041792353a8' ?  (+($user.accountID.otherInfo ? $user.accountID.otherInfo.vip : 0) ) :   (carData.venue.amount + (carData.venue.VATType == 'inclusive' ? 0 : (carData.venue.VAT / 100) * carData.venue.amount )) ) }}</span>
+                                        <div class="col-lg-6"
+                                            ng-hide="carData.customerType.toLowerCase() === 'vip'  &&  carData.venue.id === '5ccee033b7765041792353a8'">
+                                            <div class="form-group text-left">
+                                                <label>Fees</label>
+                                                <p>{{carData.venue.amount}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6"
+                                            ng-show="carData.customerType.toLowerCase() === 'vip'  &&  carData.venue.id === '5ccee033b7765041792353a8'">
+                                            <div class="form-group text-left">
+                                                <label>Fees</label>
+                                                <p>{{ carData.fees }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6"
+                                            ng-hide="carData.customerType.toLowerCase() === 'vip'  &&  carData.venue.id === '5ccee033b7765041792353a8'">
+                                            <div class="form-group text-left">
+                                                <label>{{carData.venue.VAT}}% VAT applied</label>
+                                                <input class="form-control" id="parkingFees" ng-model="carData.fees"
+                                                    value="{{carData.fees}}" disabled
+                                                    style="border:none;background:none;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 padding-0" ng-if="!carData.venue.defaultValues.free">
+                                        <div class="col-lg-6">
+                                            <div class="form-group text-left">
+                                                <label>Amount Received</label>
+                                                <div>
+                                                    <input icheck type="checkbox" ng-disabled="carData.amountPaid"
+                                                        ng-model="carData.amountPaid" value="{{carData.amountPaid}}">
+                                                    Yes
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group text-left">
+                                                <label>Print</label>
+                                                <div>
+                                                    <button class="btn btn-success"
+                                                        ng-click="printButtonClickedforPrintforBillOnly(carData, carData.venue.VAT, carData.venue.amount,  carData.fees)">
+                                                        Print
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                                    <button type="button" ng-if="!$parent.missed" class="btn btn-success"
+                                        ng-click="completeCar($parent.carData, selectedDriver.driver, images);"
+                                        id="finalCompBtnCar">
+                                        <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">
+                                            Check Out
+                                        </span>
+                                        <span ng-if="$user.accountID.timeZone != 'Asia/Dubai'">
+                                            Complete
+                                        </span>
+                                    </button>
+                                    <button type="button" ng-if="$parent.missed" class="btn btn-success"
+                                        ng-click="completeCar2($parent.carData, selectedDriver.driver, images);"
+                                        id="finalCompBtnCar">
+                                        <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">
+                                            Check Out
+                                        </span>
+                                        <span ng-if="$user.accountID.timeZone != 'Asia/Dubai'">
+                                            Complete
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="requestComplete" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form role="form">
+                            <h3>
+                                <strong>Parking Duration</strong>
+                            </h3>
+                            <ul class="list-group clear-list">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right"> {{carData.parkingID}} </span>
+                                            <strong>Ticket Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'dd-MM-yyyy'}} </span>
+                                            <strong>Park Date</strong>
+                                        </li>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right all-caps">
+                                                {{carData.otherInfo ? carData.otherInfo.plateNumber : carData.plateNumber}}
+                                            </span>
+                                            <strong>Plate Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right"> {{carData.createdAt | date:'HH:mm'}} </span>
+                                            <strong>Park Time</strong>
+                                        </li>
+                                    </div>
+                                </div>
+                            </ul>
+                            <div class="form-group" ng-controller="accountCtrl" ng-if="$user.role != 'driver'">
+                                <label>Select Driver</label>
+                                <select class="form-control" ng-model="selectedDriver.driver"
+                                    ng-options="driver as driver.userName for driver in accountDrivers track by driver.id"
+                                    id="completeDriver">
+                                    <option value="" hidden> Select Driver </option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="checkbox checkbox-info checkbox-circle">
+                                    <input id="checkbox8" type="checkbox" ng-model="$parent.missed" checked="">
+                                    <label for="checkbox8">
+                                        Oscar card missed
+                                    </label>
+                                </div>
+                                <div class="form-group" ng-if="$parent.missed">
+                                    <label>Guest</label>
+                                    <input type="text" class="form-control" ng-model="$parent.missedProofs.name"
+                                        placeholder="Guest Name" name="customkerName" id="guestName">
+                                </div>
+                                <div class="form-group" ng-if="$parent.missed">
+                                    <label>Mobile Number</label>
+                                    <input type="text" class="form-control" ng-model="$parent.missedProofs.mobile"
+                                        placeholder="Mobile Number" name="mobile" id="mobileNumber">
+                                </div>
+                                <div class="col-lg-12 fees_cal_card"
+                                    ng-if="carData.venue.settings && carData.venue.settings.initialBillPrint">
+                                    <div class="col-lg-12 padding-0">
+                                        <span style="display:none;">
+                                            {{ carData.fees = carData.venue.amount + (carData.venue.VATType == 'inclusive' ? 0 : (carData.venue.VAT / 100) * carData.venue.amount )}}</span>
+                                        <div class="col-lg-6">
+                                            <div class="form-group text-left">
+                                                <label>Fees</label>
+                                                <p>{{carData.venue.amount}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group text-left">
+                                                <label>{{carData.venue.VAT}}% VAT applied</label>
+                                                <input class="form-control" id="parkingFees" ng-model="carData.fees"
+                                                    value="{{carData.fees}}" disabled
+                                                    style="border:none;background:none;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 padding-0" ng-if="!carData.venue.defaultValues.free">
+                                        <div class="col-lg-6">
+                                            <div class="form-group text-left">
+                                                <label>Amount Received</label>
+                                                <div>
+                                                    <input icheck type="checkbox" ng-disabled="carData.amountPaid"
+                                                        ng-model="carData.amountPaid" value="{{carData.amountPaid}}">
+                                                    Yes
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group text-left">
+                                                <label>Print</label>
+                                                <div>
+                                                    <button class="btn btn-success"
+                                                        ng-click="printButtonClickedforPrintforBillOnly(carData, carData.venue.VAT, carData.venue.amount,  carData.fees)">
+                                                        Print
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                                    <button ng-if="!$parent.missed" class="btn btn-success"
+                                        ng-click="completeCar($parent.carData, selectedDriver.driver, images);"
+                                        id="compBtnCar">
+                                        <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">
+                                            Check Out
+                                        </span>
+                                        <span ng-if="$user.accountID.timeZone != 'Asia/Dubai'">
+                                            Complete
+                                        </span>
+                                    </button>
+                                    <button ng-if="$parent.missed" class="btn btn-success"
+                                        ng-click="completeCar2($parent.carData, selectedDriver.driver, images);"
+                                        id="compBtnCar">
+                                        <span ng-if="$user.accountID.timeZone == 'Asia/Dubai'">
+                                            Check Out
+                                        </span>
+                                        <span ng-if="$user.accountID.timeZone != 'Asia/Dubai'">
+                                            Complete
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="verifyModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form role="form">
+                            <div id="contact-1" class="tab-pane active">
+                                <h3><strong>Parking Duration</strong></h3>
+                                <div class="">
+                                    <ul class="list-group clear-list">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <li class="list-group-item fist-item">
+                                                    <span class="pull-right"> {{verifyData.parkingID}} </span>
+                                                    <strong>Ticket Number</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right">
+                                                        {{verifyData.createdAt | date:'dd-MM-yyyy'}} </span>
+                                                    <strong>Park Date</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right"> {{verifyData.createdAt | date:'HH:mm'}}
+                                                    </span> <strong>Park Time</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right"> {{verifyData.duration}} </span>
+                                                    <strong>Total Duration</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.validatedBy.userName | capitalize}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Validated By</strong>
+                                                </li>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <li class="list-group-item fist-item">
+                                                    <span class="pull-right all-caps">
+                                                        {{verifyData.otherInfo ? verifyData.otherInfo.plateNumber : verifyData.plateNumber}}
+                                                    </span> <strong>Plate Number</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedAt">
+                                                        {{verifyData.validatedAt | date:'dd-MM-yyyy'}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedAt"> ---
+                                                    </span>
+                                                    <strong>Validate Date</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right"> {{verifyData.validatedAt | date:'HH:mm'}}
+                                                    </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedAt"> ---
+                                                    </span>
+                                                    <strong>Validate Time</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.validatedBy.outletName}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Outlet Name</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.validatedBy.validationType | capitalize}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Validated Type</strong>
+                                                </li>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <div class="row" ng-if="verifyData.venue.cashierValidateOption">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Validate by cashier</label>
+                                                    <div class="checkbox checkbox-info checkbox-circle">
+                                                        <input id="driverLogin" type="checkbox"
+                                                            ng-model="verifyData.cashier"
+                                                            ng-change="verifyData.validationType=undefined;cashierApplyValidation(verifyData)"
+                                                            checked="">
+                                                        <label for="driverLogin">
+                                                            Validated By Cashier
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group" ng-if="verifyData.cashier">
+                                                    <label>Select Type</label>
+                                                    <select class="form-control" name="role"
+                                                        ng-model="verifyData.validationType" required id="role"
+                                                        ng-change="cashierApplyValidation(verifyData)">
+                                                        <option value="" hidden>Select Type</option>
+                                                        <option value="novalidate">No Validate</option>
+                                                        <option value="type1">Type 1</option>
+                                                        <option value="type2">Type 2</option>
+                                                        <option value="type3">Type 3</option>
+                                                        <option value="type4">Type 4</option>
+                                                        <option value="type5">Type 5</option>
+                                                        <option value="type6">Type 6</option>
+                                                        <option value="type7">Type 7</option>
+                                                        <option value="type8">Type 8</option>
+                                                        <option value="type9">Type 9</option>
+                                                        <option value="type10">Type 10</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="font-bold alert alert-success m-b-sm"
+                                            ng-if="verifyData.validationType && verifyData.validationType != 'novalidate'">
+                                            <span ng-if="verifyData.validationType != 'type1'">
+                                                <b> Base parking hours </b> <span
+                                                    ng-if="verifyData.validationType != 'type1' && verifyData.validationType != 'type2'"><b>+
+                                                        proceeding {{verifyData.validationType.substring(4) - 2 }}
+                                                        hour(s)</b> </span> <b>free</b>
+                                            </span>
+                                            <span ng-if="verifyData.validationType == 'type1'"><b>Parking </b>
+                                                <b>free</b><span></span>
+                                        </p>
+                                        <br>
+                                        <div ng-if="verifyData.cashier && verifyData.venue.cashierValidateOption">
+                                            <div class="form-group p-t-sm p-b-sm">
+                                                <label>Upload User Documents</label>
+                                                <button type="button" class="btn btn-primary pull-right" ngf-select
+                                                    ng-model="verifyData.images" name="file" ngf-multiple="true"
+                                                    ngf-max-size="20MB" ngf-accept="'image/*'">Browse any images
+                                                </button>
+                                            </div>
+                                            <div class="form-group" ng-if="verifyData.images || verifyData.documents">
+                                                <label>Uploaded Documents</label>
+                                                <div class="col">
+                                                    <div class="list" ng-if="verifyData.documents">
+                                                        <div class="item item-input item-input-padding in in done"
+                                                            ng-repeat="f in verifyData.documents">{{f}}</div>
+                                                    </div>
+                                                    <div class="list">
+                                                        <div class="item item-input item-input-padding in in done"
+                                                            ng-repeat="f in verifyData.images">
+                                                            <a target="_blank"
+                                                                ng-href="{{f.$ngfBlobUrl}}">{{f.name}}<img ngf-src="f"
+                                                                    style="display:none"></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <input type="text" class="form-control"
+                                                    ng-model="verifyData.description" placeholder="Description"
+                                                    name="Description" id="description">
+                                            </div>
+                                        </div>
+                                        <li class="list-group-item">
+                                            <label>Payment Type</label>
+                                            <select class="form-control" ng-model="verifyData.feeSplitUp.paymentType">
+                                                <option value="" hidden> Select Payment Type </option>
+                                                <option value="cash">Cash</option>
+                                                <option value="card">Credit Card</option>
+                                            </select>
+                                        </li>
+                                        <li class="list-group-item text-danger" ng-if="!verifyData.free">
+                                            <span class="pull-right">
+                                                <h3 class="m-t-0"><strong>AED {{verifyData.fees}}</strong>
+                                                </h3>
+                                            </span>
+                                            <h3><strong>Total Amount</strong></h3>
+                                        </li>
+                                    </ul>
+                                    <!-- <label>Print Bill</label>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="bill" type="checkbox" ng-model="verifyData.billPrint" checked="true">
+                                        <label for="bill">
+                                            Do you want print customer and cashier print?
+                                        </label>
+                                    </div> -->
+                                    <div class="text-right">
+                                        <button class="btn btn-primary ladda-button" ladda="loadRunner"
+                                            data-style="slide-up" type="button"
+                                            ng-click="validatedByCashier(verifyData, verifyData.images)">Fee Collected
+                                            and Request Car</button>
+                                        <!-- <button class="btn btn-success" ng-click="printTicketorBill('billPrint', verifyData)">Print</button> -->
+                                        <button type="button" class="btn btn-default"
+                                            ng-click="close();verifyData.feeSplitUp.paymentType=''">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="revalidate" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <form role="form">
+                            <div id="contact-1" class="tab-pane active">
+                                <h3><strong>Parking Duration</strong></h3>
+                                <div class="">
+                                    <ul class="list-group clear-list">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <li class="list-group-item fist-item">
+                                                    <span class="pull-right"> {{verifyData.parkingID}} </span>
+                                                    <strong>Ticket Number</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right">
+                                                        {{verifyData.createdAt | date:'dd-MM-yyyy'}} </span>
+                                                    <strong>Park Date</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right"> {{verifyData.createdAt | date:'HH:mm'}}
+                                                    </span> <strong>Park Time</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right"> {{verifyData.duration}} </span>
+                                                    <strong>Total Duration</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.validatedBy.userName | capitalize}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Validated By</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.cashAcceptedBy.userName | capitalize}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Cash Collected By</strong>
+                                                </li>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <li class="list-group-item fist-item">
+                                                    <span class="pull-right all-caps">
+                                                        {{verifyData.otherInfo ? verifyData.otherInfo.plateNumber : verifyData.plateNumber}}
+                                                    </span> <strong>Plate Number</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedAt">
+                                                        {{verifyData.validatedAt | date:'dd-MM-yyyy'}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedAt"> ---
+                                                    </span>
+                                                    <strong>Validate Date</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right"> {{verifyData.validatedAt | date:'HH:mm'}}
+                                                    </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedAt"> ---
+                                                    </span>
+                                                    <strong>Validate Time</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.validatedBy.outletName}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Outlet Name</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.validatedBy.validationType | capitalize}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not
+                                                        validated yet </span>
+                                                    <strong>Validated Type</strong>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <span class="pull-right" ng-if="verifyData.validatedBy">
+                                                        {{verifyData.cashAcceptedAt | date:'dd-MM-yyyy HH:mm'}} </span>
+                                                    <span class="pull-right" ng-if="!verifyData.validatedBy"> Not cash
+                                                        collected yet </span>
+                                                    <strong>Cash collected At</strong>
+                                                </li>
+                                                <li class="list-group-item text-danger">
+                                                    <span class="pull-right">
+                                                        <h3 class="m-t-0"><strong>AED {{verifyData.fees}}</strong>
+                                                        </h3>
+                                                    </span>
+                                                    <h3><strong>Collected Amount</strong></h3>
+                                                </li>
+                                            </div>
+                                        </div>
+                                        <br>
+                                        <div class="row">
+                                            <!-- <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Validate by cashier</label>
+                                                    <div class="checkbox checkbox-info checkbox-circle">
+                                                        <input id="driverLogin" type="checkbox" ng-model="verifyData.cashier" ng-change="verifyData.validationType=undefined;cashierApplyValidation(verifyData)" checked="">
+                                                        <label for="driverLogin">
+                                                            Validated By Cashier
+                                                            </label>
+                                                    </div>
+                                                </div>
+                                            </div> -->
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Select Type <span style="color:red;">*</span></label>
+                                                    <select class="form-control" name="role"
+                                                        ng-model="verifyData.validationType" required id="role"
+                                                        ng-change="cashierApplyRevalidation(verifyData)">
+                                                        <option value="" hidden>Select Type</option>
+                                                        <option value="novalidate" selected="selected">No Validate
+                                                        </option>
+                                                        <option value="type1">Type 1</option>
+                                                        <option value="type2">Type 2</option>
+                                                        <option value="type3">Type 3</option>
+                                                        <option value="type4">Type 4</option>
+                                                        <option value="type5">Type 5</option>
+                                                        <option value="type6">Type 6</option>
+                                                        <option value="type7">Type 7</option>
+                                                        <option value="type8">Type 8</option>
+                                                        <option value="type9">Type 9</option>
+                                                        <option value="type10">Type 10</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label>Description</label>
+                                                    <input type="text" class="form-control"
+                                                        ng-model="verifyData.description" placeholder="Description"
+                                                        name="Description" id="description">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="font-bold alert alert-success m-b-sm"
+                                            ng-if="verifyData.validationType && verifyData.validationType != 'novalidate'">
+                                            <span ng-if="verifyData.validationType != 'type1'">
+                                                <b> Base parking hours </b> <span
+                                                    ng-if="verifyData.validationType != 'type1' && verifyData.validationType != 'type2'"><b>+
+                                                        proceeding {{verifyData.validationType.substring(4) - 2 }}
+                                                        hour(s)</b> </span> <b>free</b>
+                                            </span>
+
+                                            <span ng-if="verifyData.validationType == 'type1'"><b>Parking </b>
+                                                <b>free</b><span></span>
+                                        </p>
+                                        <br>
+                                        <!-- <div ng-if="verifyData.cashier && verifyData.venue.cashierValidateOption">
+                                            <div class="form-group p-t-sm p-b-sm">
+                                                <label>Upload User Documents</label>
+                                                <button type="button" class="btn btn-primary pull-right" ngf-select ng-model="images" name="file" ngf-multiple="true" ngf-max-size="20MB" ngf-accept="'image/*'">Browse any images
+                                            </button>
+                                            </div>
+                                            <div class="form-group" ng-if="images || verifyData.documents">
+                                                <label>Uploaded Documents</label>
+                                                <div class="col">
+                                                    <div class="list" ng-if="verifyData.documents">
+                                                        <div class="item item-input item-input-padding in in done" ng-repeat="f in verifyData.documents">{{f}}</div>
+                                                    </div>
+                                                    <div class="list">
+                                                        <div class="item item-input item-input-padding in in done" ng-repeat="f in images">
+                                                            <a target="_blank" ng-href="{{f.$ngfBlobUrl}}">{{f.name}}<img ngf-src="f" style="display:none"></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                        <!-- <li class="list-group-item">
+                                            <label>Payment Type</label>
+                                            <select class="form-control" ng-model="verifyData.feeSplitUp.paymentType">
+                                                <option value="" hidden> Select Payment Type </option>
+                                                <option value="cash">Cash</option>
+                                                <option value="card">Credit Card</option>
+                                            </select>
+                                        </li> -->
+                                        <li class="list-group-item text-danger" ng-if="!verifyData.free">
+                                            <span class="pull-right">
+                                                <h3 class="m-t-0"><strong>AED {{verifyData.newfees}}</strong>
+                                                </h3>
+                                            </span>
+                                            <h3><strong>Total Amount</strong></h3>
+                                        </li>
+                                    </ul>
+                                    <!-- <label>Print Bill</label>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="bill" type="checkbox" ng-model="verifyData.billPrint" checked="">
+                                        <label for="bill">
+                                            Do you want print customer and cashier print?
+                                        </label>
+                                    </div> -->
+                                    <div class="text-right">
+                                        <button class="btn btn-primary" type="button"
+                                            ng-disabled="!verifyData.validationType"
+                                            ng-click="revalidate(verifyData, images)">Revalidate Car</button>
+                                        <button type="button" class="btn btn-default"
+                                            ng-click="close();verifyData.feeSplitUp.paymentType='';">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .ui-select-toggle>.caret {
+        pointer-events: none
+    }
+
+    .spinner-padding {
+        padding-top: 200px !important;
+        padding-bottom: 200px;
+    }
+</style>
+<script>
+    $('input:text:first').focus();
+    // $(this).attr("id")
+    // if ($(this).attr("id") == 'acceptDriver') {
+    //     alert();
+    //     $('#acceptDriver').focus();
+    // }
+</script>

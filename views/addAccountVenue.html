@@ -1,0 +1,642 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Venue</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li>
+                <a>Settings</a>
+            </li>
+            <li class="active">
+                <strong>Account venues</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn btn-default m-t-25" ui-sref="settings.accountDetails" ng-if="$user.role=='admin'">Back</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <!-- ng-init="gettingDefaultVenue(accountadminData, thisAccount)" -->
+    <div class="row" ng-if="$user.role=='admin'">
+        <div class="col-sm-6">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Add Venue</h2>
+                    <p>
+                        Add venue for your account
+                    </p>
+                    <div class="input-group">
+                        <input type="text" placeholder="Add venue" class="input form-control" ng-model="newvenue.venueName">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn btn-primary" ng-click="postAccountVenue('', newvenue)"> Add Venue</button>
+                        </span>
+                    </div>
+                    <br>
+                    <h2>Choose Default Location</h2>
+                    <div class="input-group">
+                        <select ng-model="defaultVenue" class="form-control" required>
+                            <option value="" hidden>Select Venue</option>
+                            <option ng-repeat="venueDetails in thisAccount.venues track by venueDetails.id" value="{{venueDetails.id}}">{{venueDetails.venueName | capitalize}}</option>
+                        </select>
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn btn-primary" ng-click="postDefaultVenue(defaultVenue)"> Set Venue</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Venue List</h2>
+                    <div class="full-height-scroll" full-scroll>
+                        <div class="table-responsive">
+                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                <tbody>
+                                    <tr ng-repeat="venueDetails in thisAccount.venues track by $index">
+                                        <td style="width:80%;">
+                                            {{venueDetails.venueName}}
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="btn-group">
+                                                <button class="btn-white btn btn-xs" ng-click="removeVenue(venueDetails)">Delete</button>
+                                                <button class="btn-white btn btn-xs" ng-click="open(venueDetails);">Edit</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-if="$user.role=='accountadmin'">
+        <div class="col-sm-6">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Add Venue</h2>
+                    <p>
+                        Add venue for your account
+                    </p>
+                    <form role="form">
+                        <div class="form-group">
+                            <label>Venue Name</label>
+                            <input type="text" placeholder="Venue name" class="input form-control" ng-model="newvenue.venueName">
+                        </div>
+                        <div class="form-group">
+                            <label>Short Name</label>
+                            <input type="text" class="input form-control" placeholder="Short form" ng-model="newvenue.short" ng-change="newvenue.short = (newvenue.short | uppercase)">
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group col-lg-12">
+                                <label>Upload Venue Logo</label>
+                                <span class="pull-right">
+                                    <button class="btn btn btn-primary" ngf-select ng-model="newvenue.image" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'"
+                                        ngf-max-size="20MB" ngf-resize="{width: 100, height: 100}">Browse logo
+                                    </button>
+                                </span>
+                            </div>
+                            <div class="input-group" ng-if="newvenue.image">
+                                <img ngf-src="newvenue.image" ngf-background="newvenue.image" ngf-no-object-url="true or false">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group col-lg-12">
+                                <label>Parking Slots</label>
+                                <span class="pull-right">
+                                    <button type="button" class="btn btn-primary" ng-click="zonePush(newvenue,$index)">Add Slot
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group" ng-repeat="venueZones in newvenue.parkingZones">
+                                <!-- <input type="text" class="form-control" placeholder="Slot" ng-model="venueZones.name" ng-change="venueZones.name = (venueZones.name | uppercase)"> -->
+                                <input type="text" class="form-control" placeholder="Slot name" ng-model="venueZones.name" ng-change="venueZones.name = (venueZones.name | uppercase)">
+                                <input type="number" class="form-control" placeholder="No. of Parking Slots" ng-model="venueZones.noofPatkingSlots">
+                                <input type="number" class="form-control" placeholder="Slots starts from number" ng-model="venueZones.startsfrom">
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-danger" ng-click="zoneRemove(newvenue, $index)"> -
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Set Default Customer type</label>
+                            <select class="form-control" type="text" style="margin-left:0px;margin-right:0px;" ng-model="newvenue.defaultValues.customerType">
+                                <option value="" hidden>Select default customer type</option>
+                                <option ng-repeat="customer in $user.accountID.customerTypes" value="{{customer}}">{{customer}}</option>
+                            </select>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label>Set Default payment option to be free ?</label>
+                            <input type="checkbox" class="js-switch" style="float:right;" ui-switch="{color:'#1AB394'}" ng-model="newvenue.defaultValues.free" ng-change="resetExtraSettings();" />
+                        </div>
+                        <div ng-if="!newvenue.defaultValues.free">
+                            <div class="form-group">
+                                <label>Select Payment Mode</label>
+                                <select class="form-control" name="role" ng-options="mode as (mode.name | capitalize) for mode in paymentMode" ng-model="newvenue.paymentMode" ng-change="paymentmodeHasBeenChanged('add')" required>
+                                    <option value="" hidden>Select Mode</option>
+                                </select>
+                            </div>
+                            <div ng-if="newvenue.paymentMode.name == 'hourly'">
+                                <div class="form-group">
+                                    <label>Base Hours</label>
+                                    <input type="number" class="input form-control" placeholder="Enter base hours" ng-model="newvenue.paymentMode.baseHours">
+                                </div>
+                                <div class="form-group">
+                                    <label>Base Amount</label>
+                                    <input type="number" class="input form-control" placeholder="Enter base amount" ng-model="newvenue.paymentMode.baseAmount">
+                                </div>
+                                <div class="form-group">
+                                    <label>Proceeding Amount</label>
+                                    <input type="number" class="input form-control" placeholder="Enter proceeding  amount" ng-model="newvenue.paymentMode.proceedingAmount">
+                                </div>
+                                <div class="form-group">
+                                    <label>Concession Minutes</label>
+                                    <input type="number" class="input form-control" placeholder="Enter concession minutes" ng-model="newvenue.paymentMode.concessionMinutes">
+                                </div>
+                            </div>
+                            <div ng-if="newvenue.paymentMode.name == 'day'">
+                                <div class="form-group">
+                                    <label>Base Hours</label>
+                                    <input type="number" class="input form-control" placeholder="Enter base hours" ng-model="newvenue.paymentMode.baseHours">
+                                </div>
+                                <div class="form-group">
+                                    <label>Base Amount</label>
+                                    <input type="number" class="input form-control" placeholder="Enter base amount" ng-model="newvenue.paymentMode.baseAmount">
+                                </div>
+                                <div class="form-group">
+                                    <label>Proceeding Amount</label>
+                                    <input type="number" class="input form-control" placeholder="Enter proceeding amount" ng-model="newvenue.paymentMode.proceedingAmount">
+                                </div>
+                                <div class="form-group">
+                                    <label>Concession Minutes</label>
+                                    <input type="number" class="input form-control" placeholder="Enter concession minutes" ng-model="newvenue.paymentMode.concessionMinutes">
+                                </div>
+                            </div>
+
+                            <div class="form-group" ng-if="newvenue.paymentMode.name == 'fixed'">
+                                <label>Default Fee</label>
+                                <input type="number" step="0.01" placeholder="Fees" class="input form-control" ng-model="newvenue.amount">
+                            </div>
+                            <div class="form-group">
+                                <label>VAT %</label>
+                                <input type="number" step="0.01" placeholder="VAT" class="input form-control" ng-model="newvenue.VAT">
+                            </div>
+                            <div class="form-group">
+                                <label>VAT Type</label>
+                                <select class="form-control" name="VATtype" ng-model="newvenue.VATType" required>
+                                    <option value="" hidden>Select inclusive / exclusive </option>
+                                    <option value="inclusive">Inclusive</option>
+                                    <option value="exclusive">Exclusive</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Extra options</label>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.twoLevelValidation">
+                                        Outlet validation
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.cashierValidateOption">
+                                        Cashier also validate ticket
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Token type</label>
+                            <div>
+                                <label class="m-sm"> 
+                                    <input icheck type="checkbox" ng-model="newvenue.automaticTokenGeneration">
+                                        Automatic Token Generation
+                                </label>
+                                <label class="m-sm"> 
+                                    <input icheck type="checkbox" ng-model="newvenue.printToken">
+                                        Print
+                                 </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Options</label>
+                            <div>
+                                <label class="m-sm"> 
+                                    <input icheck type="checkbox" ng-model="newvenue.settings.carModalName">
+                                        Show Car Model Name when adding a car 
+                                </label>
+                            </div>
+                            <div ng-if="newvenue.defaultValues.free">
+                                <label class="m-sm"> 
+                                    <input icheck type="checkbox" ng-model="newvenue.settings.reverseCarState">
+                                        Show Reverse Car Options (Move Incorrect Requested/Accept Car to Parked Car) 
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Extra Settings</label>
+                            <div ng-if="!newvenue.defaultValues.free">
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.keyandDashboardCopy">
+                                        Show Print Key and Dashboard Copy while adding a car [Mobile Only]
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.verifyOption" ng-change="newvenue.settings.initialBillPrint=false">
+                                        Enable Verify Option
+                                    </label>
+                                </div>
+                                <div ng-if="newvenue.paymentMode.name == 'fixed'">
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.initialBillPrint" ng-change="newvenue.settings.verifyOption=false">
+                                        Want to collect fee while adding a car?
+                                    </label>
+                                </div>
+                            </div>
+                            <div ng-if="!newvenue.defaultValues.free">
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.requestCar">
+                                        Enable request car Tab and Button
+                                    </label>
+                                </div>
+                            </div>
+                            <div ng-if="newvenue.defaultValues.free">
+                                <div ng-if="!$user.accountID.timeZone || $user.accountID.timeZone != 'Asia/Dubai'">
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.SMS">
+                                        Enable SMS OTP Options [India Only]
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.requestCar">
+                                        Enable request car Tab and Button
+                                    </label>
+                                </div>
+                                <div ng-if="!$user.accountID.timeZone || $user.accountID.timeZone != 'Asia/Dubai'">
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.parkingZoneAutomaticAllocaton">
+                                        Parking Zone Automatic Allocaton [India Only]
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="newvenue.settings.completeCar">
+                                        Enable Complete Car Button in Parked Car Tab 
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary pull-right m-t-n-xs" ng-click="postAccountVenue(newvenue.image, newvenue)" type="button">
+                                <strong>Submit</strong>
+                            </button>
+                        </div>
+                        <br>
+                    </form>
+                </div>
+            </div>
+            <!-- <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Choose Default Location</h2>
+                    <div class="input-group">
+                        <select ng-model="defaultVenue" class="form-control" required>
+                            <option value="" hidden="">Select Venue</option>
+                            <option ng-repeat="venueDetails in accountadminData.venues track by venueDetails.id" value="{{venueDetails.id}}">{{venueDetails.venueName | capitalize}}</option>
+                        </select>
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn btn-primary" ng-click="postDefaultVenue(defaultVenue);"> Set Venue</button>
+                        </span>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+        <div class="col-lg-6">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Venue List</h2>
+                    <div class="full-height-scroll" full-scroll>
+                        <div class="table-responsive">
+                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                <tbody>
+                                    <tr ng-repeat="venueDetails in accountadminData.venues track by $index">
+                                        <td width="80%">
+                                            <div class="chat-element">
+                                                <a href="" class="pull-left">
+                                                    <img ng-if="!venueDetails.logo" src="img/unknown_hotel.png" alt="image" class="img-circle circle-border m-b-md" />
+                                                    <img ng-if="venueDetails.logo" alt="image" class="img-circle circle-border m-b-md" ng-src="{{ipAddress}}/images/{{venueDetails.logo}}" />
+                                                </a>
+                                                <div class="media-body">
+                                                    <strong>{{venueDetails.venueName | capitalize}}</strong>
+                                                    <p class="m-b-xs">
+                                                        <span data-ng-repeat="zone in venueDetails.parkingZones"> {{zone.name}}
+                                                            <font ng-show="!$last">,</font>
+                                                        </span>
+                                                    </p>
+                                                    <small class="text-muted">Short Form : {{venueDetails.short ? venueDetails.short : 'not assigned'}}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="btn-group">
+                                                <button class="btn-danger btn btn-xs" ng-click="removeVenue(venueDetails, 'accountAdmin')">Delete</button>
+                                                <button class="btn-white btn btn-xs" ng-click="open(venueDetails);">Edit</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="venuEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Edit Venue</h3>
+                        <p>Enter venue name to update</p>
+                        <form role="form" ng-submit="editVenueName(venueDetails)" ng-if="$user.role!='admin'">
+                            <div class="form-group">
+                                <div>
+                                    <label>Upload Venue Logo</label>
+                                    <span class="pull-right">
+                                        <button class="btn btn btn-primary" ngf-select ng-model="venueDetails.venuLogo" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'"
+                                            ngf-max-size="20MB">Browse logo
+                                        </button>
+                                    </span>
+                                </div>
+                                <div>
+                                    <img ng-if="venueDetails.venuLogo" ngf-src="venueDetails.venuLogo" ngf-background="venueDetails.venuLogo" class="m-b-md" ngf-no-object-url="true or false" width="150px">
+                                    <img ng-if="venueDetails.logo && !venueDetails.venuLogo" alt="image" class="m-b-md" ng-src="{{ipAddress}}/images/{{venueDetails.logo}}" type="{{image.file.type}}" on-error-src-user width="150px" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Venue</label>
+                                <input type="text" placeholder="Enter Venue" class="form-control" ng-model="venueDetails.venueName">
+                            </div>
+                            <div class="form-group">
+                                <label>Short form</label>
+                                <input class="form-control" type="text" placeholder="Short" ng-model="venueDetails.short" ng-change="venueDetails.short = (venueDetails.short | uppercase)">
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <label>Parking Slots</label>
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-primary" ng-click="zonePush(venueDetails,$index)">Add Slot
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group" ng-repeat="venueZones in venueDetails.parkingZones" style="    padding-bottom: 23px;">
+                                    <input type="text" class="form-control" placeholder="Slot name" ng-model="venueZones.name" ng-change="venueZones.name = (venueZones.name | uppercase)">
+                                    <input type="number" class="form-control" placeholder="No. of Parking Slots" ng-model="venueZones.noofPatkingSlots">
+                                    <input type="number" class="form-control" placeholder="Slots starts from number" ng-model="venueZones.startsfrom">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-danger" ng-click="zoneRemove(venueDetails, $index)"> -
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Set Default Customer type</label>
+                                <select class="form-control" type="text" style="margin-left:0px;margin-right:0px;" ng-model="venueDetails.defaultValues.customerType">
+                                    <option value="" hidden>Select default customer type</option>
+                                    <option ng-repeat="customer in $user.accountID.customerTypes" value="{{customer}}">{{customer}}</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Set Default chauffeur</label>
+                                <select class="form-control" type="text" ng-model="venueDetails.defaultValues.driver" style="margin-left:0px;margin-right:0px;" ng-options="driver as driver.userName for driver in thisVenueChauffeurs track by driver.id">
+                                    <option value="" hidden>Select default driver</option>
+                                </select>
+                            </div>
+                            <!-- 
+                            <div class="form-group">
+                                <label>Set Default payment option to be free ?</label>
+                                <input type="checkbox" class="js-switch" style="float:right;" ui-switch="{color:'#1AB394'}" ng-model="venueDetails.defaultValues.free" />
+                            </div> -->
+                            <div class="form-group">
+                                <label>Set Default payment optionto be free ?</label>
+                                <input ng-if="venueDetails.defaultValues.free" type="checkbox" class="js-switch" style="float:right;" ui-switch="{color:'#1AB394'}" ng-model="venueDetails.defaultValues.free" checked/>
+                                <input ng-if="!venueDetails.defaultValues.free" type="checkbox" class="js-switch" style="float:right;" ui-switch="{color:'#1AB394'}" ng-model="venueDetails.defaultValues.free" />
+                            </div>
+                            <div ng-if="!venueDetails.defaultValues.free">
+                                <div class="form-group">
+                                    <label>Select Payment Mode</label>
+                                    <select class="form-control" name="role" ng-options="mode as (mode.name | capitalize) for mode in paymentMode track by mode.name" ng-model="venueDetails.paymentMode" ng-change="paymentmodeHasBeenChanged('edit')" required>
+                                    <option value="" hidden>Select Mode</option>
+                                </select>
+                                </div>
+                                <div ng-if="venueDetails.paymentMode.name == 'hourly'">
+                                    <div class="form-group">
+                                        <label>Base Hours</label>
+                                        <input type="number" class="input form-control" placeholder="Enter base hours" ng-model="venueDetails.paymentMode.baseHours">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Base Amount</label>
+                                        <input type="number" class="input form-control" placeholder="Enter base hour amount" ng-model="venueDetails.paymentMode.baseAmount">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Proceeding Amount</label>
+                                        <input type="number" class="input form-control" placeholder="Enter proceeding amount" ng-model="venueDetails.paymentMode.proceedingAmount">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Concession Minutes</label>
+                                        <input type="number" class="input form-control" placeholder="Enter Concession minutes" ng-model="venueDetails.paymentMode.concessionMinutes">
+                                    </div>
+                                </div>
+                                <div ng-if="venueDetails.paymentMode.name == 'day'">
+                                    <div class="form-group">
+                                        <label>Base Hours</label>
+                                        <input type="number" class="input form-control" placeholder="Enter base hours" ng-model="venueDetails.paymentMode.baseHours">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Base Amount</label>
+                                        <input type="number" class="input form-control" placeholder="Enter base amount" ng-model="venueDetails.paymentMode.baseAmount">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Proceeding Amount</label>
+                                        <input type="number" class="input form-control" placeholder="Enter proceeding amount" ng-model="venueDetails.paymentMode.proceedingAmount">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Concession Minutes</label>
+                                        <input type="number" class="input form-control" placeholder="Enter concession minutes" ng-model="venueDetails.paymentMode.concessionMinutes">
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group" ng-if="venueDetails.paymentMode.name == 'fixed'">
+                                    <label>Default Fee</label>
+                                    <input type="number" step="0.01" placeholder="Fees" class="input form-control" ng-model="venueDetails.amount">
+                                </div>
+                                <div class="form-group">
+                                    <label>VAT %</label>
+                                    <input type="number" step="0.01" placeholder="VAT" class="input form-control" ng-model="venueDetails.VAT">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>VAT Type</label>
+                                    <select class="form-control" name="VATtype" ng-model="venueDetails.VATType" required>
+                                        <option value="" hidden>Select inclusive / exclusive </option>
+                                        <option value="inclusive">Inclusive</option>
+                                        <option value="exclusive">Exclusive</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Extra options</label>
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.twoLevelValidation">
+                                            Outlet validation
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.cashierValidateOption">
+                                            Cashier also validate ticket
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Token type</label>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="venueDetails.automaticTokenGeneration">
+                                        Automatic Token Generation
+                                    </label>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="venueDetails.printToken">
+                                            Print
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Additional Options</label>
+                                <div>
+                                    <label class="m-sm"> 
+                                    <input icheck type="checkbox" ng-model="venueDetails.settings.carModalName">
+                                        <!-- Car Modal Name -->
+                                        Show Car Model Name when adding a car 
+                                </label>
+                                </div>
+                                <div ng-if="venueDetails.defaultValues.free">
+                                    <label class="m-sm"> 
+                                    <input icheck type="checkbox" ng-model="venueDetails.settings.reverseCarState">
+                                        <!-- Car Reverse Option -->
+                                         Show Reverse Car Options (Move Incorrect Requested/Accept Car to Parked Car) 
+                                </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Extra Settings</label>
+                                <div ng-if="!venueDetails.defaultValues.free">
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.keyandDashboardCopy">
+                                            <!-- Key and Dashboard Copy -->
+                                            Show Print Key and Dashboard Copy while adding a car [Mobile Only]
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.verifyOption" ng-change="venueDetails.settings.initialBillPrint=false">
+                                            <!-- Verify Option -->
+                                            Enable Verify Option
+                                        </label>
+                                    </div>
+                                    <div ng-if="venueDetails.paymentMode.name == 'fixed'">
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.initialBillPrint" ng-change="venueDetails.settings.verifyOption=false">
+                                            <!-- Initial BillPrint -->
+                                            Want to collect fee while adding a car?
+                                        </label>
+                                    </div>
+                                </div>
+                                <div ng-if="!venueDetails.defaultValues.free">
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.requestCar">
+                                            Enable request car Tab and Button
+                                        </label>
+                                    </div>
+                                </div>
+                                <div ng-if="venueDetails.defaultValues.free">
+                                    <div ng-if="!$user.accountID.timeZone || $user.accountID.timeZone != 'Asia/Dubai'">
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.SMS">
+                                            Enable SMS OTP Options [India Only]
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.requestCar">
+                                            Enable request car Tab and Button
+                                        </label>
+                                    </div>
+                                    <div ng-if="!$user.accountID.timeZone || $user.accountID.timeZone != 'Asia/Dubai'">
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.parkingZoneAutomaticAllocaton">
+                                            Parking Zone Automatic Allocaton [india Only]
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="m-sm"> 
+                                            <input icheck type="checkbox" ng-model="venueDetails.settings.completeCar">
+                                            Enable Complete Car Button in Parked Car Tab 
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit">
+                                    <strong>Update</strong>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()">
+                                    <strong>Close</strong>
+                                </button>
+                            </div>
+                        </form>
+                        <form role="form" ng-submit="editVenueName(venueDetails);" ng-if="$user.role=='admin'">
+                            <div class="form-group">
+                                <label>Venue</label>
+                                <input type="text" placeholder="Enter Venue" class="form-control" ng-model="venueDetails.venueName">
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit">
+                                    <strong>Update</strong>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()">
+                                    <strong>Close</strong>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

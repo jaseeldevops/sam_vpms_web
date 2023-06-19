@@ -1,0 +1,101 @@
+<div class="row wrapper border-bottom white-bg page-heading p-b-0">
+    <div class="col-lg-12">
+        <div class="col-lg-3 padding-0">
+            <h2>Validate Ticket</h2>
+            <ol class="breadcrumb">
+                <li>
+                    <a ui-sref="app.mainDashboard">Home</a>
+                </li>
+                <li class="active">
+                    <strong>Validate Ticket</strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-6">
+            <div class="bg-white-p-20">
+                <h3>Enter Ticket / Plate Number</h3>
+                <form role="form" class="row">
+                    <div class="col-lg-12">
+                        <div class="input-group pull-right">
+                            <input type="text" class="form-control" name="parkingID" placeholder="Ticket / Plate Number" ng-model="$parent.ticketorPlateNumber" ng-keyup="vlidateTicket(ticketorPlateNumber, $event)">
+                            <span class="input-group-btn">                                     
+                                <button type="button" class="btn btn-primary" ng-click="getCarInfo(ticketorPlateNumber)">
+                                    Search
+                                </button>  
+                                    <button type="button" class="btn m-l-5 btn-white" ng-click="clearforValidatorsearch();">Clear
+                                </button>                                                      
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight" style="height:500px;">
+    <!-- <div class="row">
+        <div class="col-lg-12">
+            <div class="col-lg-6 form-center">
+                <div class="bg-white-p-20">
+                    <h3>Enter Ticket / Plate Number</h3>
+                    <form role="form" class="row">
+                        <div class="col-lg-12">
+                            <div class="input-group pull-right">
+                                <input type="text" class="form-control" name="parkingID" placeholder="Ticket / Plate Number" ng-model="ticketorPlateNumber" ng-keyup="vlidateTicket(ticketorPlateNumber, $event)">
+                                <span class="input-group-btn">                                     
+                                    <button type="button" class="btn btn-primary" ng-click="getCarInfo(ticketorPlateNumber)">
+                                        Search
+                                    </button>  
+                                     <button type="button" class="btn m-l-5 btn-white" ng-click="clearforValidatorsearch();ticketorPlateNumber=''">Clear
+                                    </button>                                                      
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <br>
+    <div class="row" ng-if="carInformation">
+        <div class="col-lg-12">
+            <div class="col-lg-6 form-center">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="tab-content">
+                            <div id="contact-1" class="tab-pane active" ng-show="client == 1" ng-init="client = 1">
+                                <h3><strong>Car Information</strong></h3>
+                                <hr>
+                                <div class="">
+                                    <ul class="list-group clear-list">
+                                        <li class="list-group-item fist-item">
+                                            <span class="pull-right all-caps"> {{carInformation.parkingID}} </span> <strong>Ticket Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right all-caps"> {{carInformation.plateNumber}} </span> <strong>Plate Number</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right all-caps"> {{carInformation.brand}} </span> <strong>Model</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <span class="pull-right all-caps"> {{carInformation.color}} </span> <strong>Color</strong>
+                                        </li>
+                                        <li class="list-group-item">
+                                        </li>
+                                        <span class="pull-right"> {{carInformation.createdAt | date:'dd-MM-yyyy HH:mm'}} </span> <strong>Check in Time</strong>
+                                    </ul>
+                                    <div class="text-right">
+                                        <button class="btn btn-primary" ng-click="validatedByValidator(carInformation);ticketorPlateNumber=''">Validate</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('input:text:first').focus();
+</script>

@@ -1,0 +1,106 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Account List</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li>
+                <a>Settings</a>
+            </li>
+            <li class="active">
+                <strong>Account List</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn red-bg m-t-25" data-toggle="modal" data-target="#addAccount">Add</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-3" ng-repeat="account in accountDatas track by $index">
+            <div class="contact-box center-version">
+                <a ng-click="list(account);" ui-sref="settings.accountDetails">
+                    <!-- <img alt="image" class="img-circle" src="img/a2.jpg"> -->
+                    <h3 class="m-b-xs"><strong>{{account.accountName | capitalize}}</strong></h3>
+                    <div class="font-bold">Status: {{account.status | capitalize}}</div>
+                    <p>From: {{account.createdAt | date:'yyyy-MM-dd'}}</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="addAccount" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Add Subscription</h3>
+                        <form role="form" ng-submit="postAccount(accountData)">
+                            <div class="form-group">
+                                <label>Account Name</label>
+                                <input type="text" placeholder="Account Name" class="form-control" ng-model="accountData.accountName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Subscription</label>
+                                <select class="form-control" ng-model="accountData.subscriptionID" ng-controller="subscriptionCtrl" required>
+                                    <option value="" disabled selected hidden>Select Subscription</option>
+                                    <option ng-repeat="subscription in subscriptionDatas" value="{{subscription.id}}">{{subscription.subscriptionName | capitalize}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Select subscription Status</label>
+                                <select class="form-control" ng-model="accountData.subscriptionStatus">
+                                    <option value="" disabled selected hidden>Select Subscription Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="blocked">Blocked</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Region</label>
+                                <select class="form-control" ng-model="accountData.region" name="region" ng-change="regionSelected(accountData.region)" required>
+                                    <option value="" disabled selected hidden>Select Region</option>
+                                    <option ng-repeat="reg in regions" value="{{reg.group}}">{{reg.group | capitalize}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Select timeZone</label>
+                                <select class="form-control" ng-model="accountData.timeZone" name="timeZone" required>
+                                    <option value="" disabled selected hidden>Select timeZone</option>
+                                    <option ng-repeat="reg in timeZone" value="{{reg.value}}">{{reg.name | capitalize}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>PaymentID</label>
+                                <input type="text" placeholder="PaymentID" class="form-control" ng-model="accountData.paymentID" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Payment Description</label>
+                                <input type="text" placeholder="Payment Description" class="form-control" ng-model="accountData.paymentDescription" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Payment Type</label>
+                                <input type="text" placeholder="Payment Type" class="form-control" ng-model="accountData.paymentType" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="text" placeholder="Amount" class="form-control" ng-model="accountData.amount" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Bank Details</label>
+                                <input type="text" placeholder="Bank Details" class="form-control" ng-model="accountData.bank" required>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit"><strong>Submit</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Close</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,124 @@
+<div class="row wrapper border-bottom white-bg page-heading" ng-init="getViewedUserVenueDeatsil(details.id);">
+    <div class="col-lg-10">
+        <h2>User Details</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>User Info</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn btn-default m-t-25" ui-sref="settings.users">Back</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row pull-center">
+        <div class="col-lg-offset-1 col-lg-10">
+            <div class="contact-box border">
+                <div class="col-lg-5">
+                    <div class="widget-head-color-box navy-bg p-lg text-center">
+                        <div class="m-b-md">
+                            <h2 class="font-bold no-margins">
+                                {{details.fullName | capitalize}}
+                            </h2>
+                            <small>{{details.role | capitalize}}</small>
+                        </div>
+                        <div ng-if="!image || image.$error">
+                            <img ng-if="!details.profileImage" src="img/unknown.png" alt="image" class="img-circle circle-border m-b-md" data-toggle="tooltip" data-placement="top" title="Click And Edit You Picture" ng-click="hideProfile();" />
+                            <img ng-if="details.profileImage" alt="image" class="img-circle circle-border m-b-md" ng-src="{{ipAddress}}/images/{{details.profileImage}}" type="{{image.file.type}}" on-error-src-user ng-click="hideProfile();" />
+                        </div>
+                        <img ng-if="image && !image.$error" ngf-src="image" ngf-background="image" class="img-circle circle-border m-b-md" ngf-no-object-url="true or false">
+                    </div>
+                    <div class="widget-text-box">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <button class="btn btn-default full-width" ngf-select ng-model="image" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB" ngf-resize="{width: 100, height: 100}"><small>Browse image</small></button>
+                            </div>
+                            <hr>
+                            <div class="col-lg-12 padding-0">
+                                <div class="col-lg-6">
+                                    <button class="btn btn-default full-width" ng-click="UploadProFile(image, details.id);" ng-disabled="!image ||image.$error"><small>Upload</small></button>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button class="btn btn-default full-width" ng-click="cancelUpload();image =''"><small>Cancel</small></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <button class="btn btn-default pull-right" ng-click="openUserProfileEditModal('accountUserEdit')">Edit</button>
+                    <h3><strong>{{details.userName | capitalize}}</strong></h3>
+                    <!-- <p ng-repeat="venue in details.venues"><i class="fa fa-map-marker"></i> {{venue.venueName | capitalize}}</p> -->
+                    <strong>Contact details</strong>
+                    <ul class="list-group clear-list">
+                        <li class="list-group-item fist-item">
+                            <span class="pull-right"> {{details.userName | capitalize}} </span> User Name:
+                        </li>
+                        <li class="list-group-item">
+                            <span class="pull-right" href="tel:{{details.mobile}}">{{details.mobile}}</span> Mobile:
+                        </li>
+                        <li class="list-group-item" ng-if="thisAccountUserLogDetails.joiningDate">
+                            <span class="pull-right">{{thisAccountUserLogDetails.joiningDate | date : medium}}</span> Joining Date:
+                        </li>
+                        <li class="list-group-item">
+                            <span class="pull-right" href="mailto:{{details.email}}">{{details.email}}</span> Email:
+                        </li>
+                        <li class="list-group-item" ng-repeat="venue in details.venues">
+                            <span class="pull-right"> {{venue.venueName | capitalize}} <i class="fa fa-map-marker"></i></span> Venue(s):
+                        </li>
+                        <li class="list-group-item" ng-repeat="doc in thisAccountUserLogDetails.documents" ng-click="">
+                            <span class="pull-right"> {{doc | capitalize}} <a target="_self" href="{{ipAddress}}/images/{{doc}}" download="{{doc}}">
+                                     <i class="fa fa-download"></i></span> </a>
+                            <span>Uploaded Documents : {{$index+1}}</span>
+                        </li>
+                    </ul>
+                    <div class="text-right">
+                        <button class="btn btn-success" ng-click="selectAccountUserToVenue(details.id,details.role);" ui-sref="app.assign_venue">Change Venue</button>
+                        <button class="btn btn-success" ng-click="deleteUser();">Remove</button>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal animated fadeInRight" id="userProfileEdit" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Edit User Informations</h3>
+                        <form role="form" ng-submit="saveEditedUser();">
+                            <!-- <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" placeholder="Full Name" class="form-control" ng-model="details.fullName" required>
+                            </div> -->
+                            <div class="form-group">
+                                <label>User Name</label>
+                                <input type="text" placeholder="User Name" class="form-control" ng-model="details.userName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mobile</label>
+                                <input type="text" placeholder="Mobile" class="form-control" ng-model="details.mobile" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" placeholder="Email" class="form-control" ng-model="details.email" required>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit"><strong>Update</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Close</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

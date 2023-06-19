@@ -1,0 +1,395 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-8">
+        <h2>Report</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Report</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-4" ng-init="loadRunner = false">
+        <div class="pull-right m-t-25" ng-if="reports.length > 0">
+
+            <button class="btn btn-success ladda-button" ladda="loadRunner" data-style="slide-up" type="button" ng-click="downloadReport(reports);"><i class="fa fa-download"></i>&nbsp;&nbsp;<span class="bold">Download</span></button>
+
+            <button class="btn btn-info" data-style="slide-up" type="button" ng-click="openMailSendModal($event);"><i class="fa fa-envelope-o"></i>&nbsp;&nbsp;<span class="bold">Email Report</span></button>
+        </div>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Report <a ng-if="$user.role == 'accountadmin'" ui-sref="settings.reportSetting" style="font-size: medium;font-weight: 500;"><span class="bold">Do you want to customize your report?</span></a></h2>
+                    <div class="row">
+                        <div class="form-group" ng-class="{'col-lg-3': $user.role=='admin', 'col-lg-5': $user.role!='admin'}">
+                            <div class="">
+                                <label class="font-normal">Enter date to get report</label>
+<!-- date-range-picker -->
+                                <input  class="form-control date-picker" type="date" ng-model="$parent.daterange.startDate" />
+                                <input  class="form-control date-picker" type="date" ng-model="$parent.daterange.endDate" />
+                            </div>
+                        </div>
+                        <div ng-if="$user.role != 'admin'" ng-controller="venueCtrl">
+                            <div class="form-group col-lg-4">
+                                <label class="font-normal">Select Venue:</label>
+                                <div ng-show="$user.role != 'accountinguser' && $user.role != 'chauffeur'">
+                                    <select class="form-control" ng-model="SelectedVenueName" placeholder="Select Venue" ng-options="venueDetails.id as venueDetails.venueName for venueDetails in venue">
+                                        <span ng-if="!$select.selected.venueName">All Venue</span>
+                                            <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)"><i class="glyphicon glyphicon-remove"></i></a>
+                                        <option value="">All Venue</option>
+                                    </select>
+                                </div>
+                                <!-- <ui-select ng-model="SelectedVenueName" theme="bootstrap" reset-search-input="false">
+                                    <ui-select-match placeholder="All Venue">{{$select.selected.venueName}}
+                                        <span ng-if="!$select.selected.venueName">All Venue</span>
+                                        <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)"><i class="glyphicon glyphicon-remove"></i></a>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="venueDetails in venue | custom : $select.search" refresh="refreshResults($select)" refresh-delay="0">
+                                        <div ng-bind-html="venueDetails.venueName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select> -->
+                                <div ng-if="selectedOptionsforanAnalysis.venue && ($user.role == 'accountinguser' || $user.role == 'chauffeur')">
+                                    {{selectedOptionsforanAnalysis.venue.venueName}}
+                                </div>
+                            </div>
+                            <div class="col-lg-2 m-t-24">
+                                <!-- <button class="btn btn-primary full-width ladda-button"  ladda="reportno == 'Loading Record...'" data-style="expand-right"  ng-click="getReport(SelectedVenueName);">Submit</button> -->
+                                <button class="btn btn-primary full-width ladda-button" ladda="reportno == 'Loading Record...'" data-style="expand-right" ng-click="getReportforOscarwithPagination(SelectedVenueName, q, null, selectedParameter);">Submit</button>
+                            </div>
+                        </div>
+                        <div  ng-if="$user.role == 'admin'" ng-controller="venueCtrl">
+                            <div class="form-group col-lg-3">
+                                <label class="font-normal">Select Account:</label>
+                                <select class="form-control" ng-model="selected" placeholder="Select Account" ng-options="account as account.accountName for account in accountWithvenues track by account.id">
+                                    <option value="" hidden>Select Account</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-lg-3" ng-if="selected.accountName">
+                                <label class="font-normal">Select Venue:</label>
+                                <select class="form-control" ng-model="selected.venue" placeholder="Select Venue" ng-options="venue as venue.venueName for venue in selected.venues">
+                                    <option value="" hidden>All Venue</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 m-t-24">
+                                <button class="btn btn-primary full-width ladda-button" ladda="reportno == 'Loading Record...'" data-style="expand-right" ng-click="getReportforAdmin(selected, q, null, selectedParameter);" ng-disabled="!selected">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12" ng-if="reports.length > 0">
+                            <div class="col-lg-3">
+                                <div class="row p-sm">
+                                    <button type="button" class="btn btn-success m-r-sm"><span count-from="0" count-to="{{reportsWidget.parked}}"  duration="4"></span></button> Total Parked Cars
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="row p-sm">
+                                    <button type="button" class="btn btn-danger m-r-sm"><span count-from="0" count-to="{{reportsWidget.requested}}" duration="4"></span></button> Total Requested Cars
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="row p-sm">
+                                    <button type="button" class="btn btn-warning m-r-sm"><span count-from="0" count-to="{{reportsWidget.accept}}" duration="4"></span></button> Total Accepted Cars
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="row p-sm">
+                                    <button type="button" class="btn btn-primary m-r-sm"><span count-from="0" count-to="{{reportsWidget.completed}}" duration="4"></span></button> Total Completed cars
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ibox border" ng-if="reports.length > 0">
+        <div class="ibox-content"  ng-if="$user.role != 'admin'">
+            <div class="ibox-content" ng-if="reports.length > 0 && !notOscarVerion">
+                <div class="row">
+                    <div class="col-lg-12 white-bg">
+                        <div class="row m-t-md m-b-md">
+                            <div class="col-lg-6 text-left m-t-lg">
+                                <p>No of entries: <strong>{{total}}</strong></p>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="search">Select search by:</label>
+                                <select class="form-control" ng-init="selectedParameter='parkingID'" ng-model="selectedParameter">
+                                    <option value="parkingID" selected>Token Number</option>
+                                    <option value="plateNumber">Plate Number</option>
+                                    <option value="brand">Brand</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="search">Search:</label>
+                                <input type="text" ng-model="searchQuery" class="form-control" ng-keyup="enterKeyFun(newPageNumber, searchQuery, SelectedVenueName, selectedParameter, $event)" placeholder="Search by {{(selectedParameter=='parkingID')? 'token number':(selectedParameter=='plateNumber' ? 'plate number' : selectedParameter) }}">
+                                <button ng-if="searchQuery != ''" ng-click="clearSearchedReport(newPageNumber, q, SelectedVenueName, selectedParameter)">Clear</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket No</th>
+                                        <th>Plate Number</th>
+                                        <th>Parking Location</th>
+                                        <th>Car Model</th>
+                                        <th>Colour</th>
+                                        <th>Check In Date</th>
+                                        <th>TIme In</th>
+                                        <th>CVA In</th>
+                                        <th>Check Out Date</th>
+                                        <th>Time Out</th>
+                                        <th>CVA Out</th>
+                                        <th>Duration</th>
+                                        <th>Fees</th>
+                                        <th>Description</th>
+                                        <th>Camera Capture</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="report in reports | itemsPerPage: pageSize as filteredLength" current-page="currentPage" total-items="total">
+                                        <td>{{ report.parkingID | capitalize}}</td>
+                                        <td>{{ report.plateNumber | capitalize}}</td>
+                                        <td>{{ report.parkingZone | capitalize}}</td>
+                                        <td>{{ report.brand | allUpperCase}}</td>
+                                        <td>{{ report.color | allUpperCase}}</td>
+                                        <td>{{ report.createdAt | date : 'dd MMM yyyy'}}</td>
+                                        <td>{{ report.createdAt | date : 'HH:mm'}}</td>
+                                        <td> <span ng-if="report.log[0].employeeName"></span>{{ report.log[0].employeeName | capitalize}}</span>
+                                        </td>
+                                        <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.updatedAt  | date : 'dd MMM yyyy'}}</span></td>
+                                        <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.updatedAt  | date : 'HH:mm'}}</span></td>
+                                        <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.log[report.log.length - 1].employeeName  | capitalize}}</span></td>
+                                        <td>{{ calculateDuration(report.createdAt, report.updatedAt)}}</td>
+                                        <td>{{ report.fees}}</td>
+                                        <td>{{ report.description}}</td>
+                                        <td>
+                                            <span ng-repeat="imgg in report.scratchesSnap">
+                                                <a href="{{ipAddress}}/images/{{imgg}}" target="_blank">{{imgg}}</a>
+                                            </span>
+                                            <span ng-if="report.snap !== 'noImage'">
+                                                <a href="{{ipAddress}}/images/{{report.snap}}" target="_blank">{{report.snap}}</a>
+                                            </span>
+                                            <span ng-repeat="docs in report.documents">
+                                                <a href="{{ipAddress}}/images/{{docs}}" target="_blank">{{docs}}</a>
+                                            </span>
+                                            
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-right">
+                            <dir-pagination-controls boundary-links="true" on-page-change="pageChangeHandler(newPageNumber, q, SelectedVenueName, selectedParameter)"></dir-pagination-controls>
+                        </div>
+                        <div class="reportLoader" ng-if="loadRunner">
+                            <div class="load-btn">
+                                <div class="sk-spinner sk-spinner-wave">
+                                    <div class="sk-rect1"></div>
+                                    <div class="sk-rect2"></div>
+                                    <div class="sk-rect3"></div>
+                                    <div class="sk-rect4"></div>
+                                    <div class="sk-rect5"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            <div class="ibox-content" ng-if="reports.length > 0 && notOscarVerion">
+                <div>
+                    <div class="row">
+                        <div class="col-lg-12 white-bg">
+                            <div class="row m-t-md m-b-md">
+                                <div class="col-lg-6 text-left m-t-lg">
+                                    <p>No of entries: <strong>{{total}}</strong></p>
+                                </div>
+                                <div class="col-lg-3">
+                                    <label for="search">Select search by:</label>
+                                    <select class="form-control" ng-init="selectedParameter='parkingID'" ng-model="selectedParameter">
+                                        <option value="parkingID" selected>Token Number</option>
+                                        <option value="plateNumber">Plate Number</option>
+                                        <option value="brand">Brand</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-3">
+                                    <label for="search">Search:</label>
+                                    <input type="text" ng-model="searchQuery" class="form-control" ng-keyup="enterKeyFun(newPageNumber, searchQuery, SelectedVenueName, selectedParameter, $event)" placeholder="Search by {{(selectedParameter=='parkingID')? 'token number':(selectedParameter=='plateNumber' ? 'plate number' : selectedParameter) }}">
+                                    <button ng-if="searchQuery != ''" ng-click="clearSearchedReport(newPageNumber, q, SelectedVenueName, selectedParameter)">Clear</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th ng-repeat="disp in excellFormatedData" ng-if="disp.name != 'All'">{{disp.displayName}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- <tr dir-paginate="report in reports | itemsPerPage: pageSize as filteredLength" current-page="currentPage" total-items="total">
+                                            <td>{{ report.parkingID | capitalize}}</td>
+                                            <td>{{ report.parkingZone | capitalize}}</td>
+                                            <td>{{ report.brand | allUpperCase}}</td>
+                                            <td>{{ report.color | allUpperCase}}</td>
+                                            <td>{{ report.createdAt | date : 'dd MMM yyyy'}}</td>
+                                            <td>{{ report.createdAt | date : 'HH:mm'}}</td>
+                                            <td> <span ng-if="report.log[0].employeeName"></span>{{ report.log[0].employeeName | capitalize}}</span>
+                                            </td>
+                                            <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.updatedAt  | date : 'dd MMM yyyy'}}</span></td>
+                                            <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.updatedAt  | date : 'HH:mm'}}</span></td>
+                                            <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.log[report.log.length - 1].employeeName  | capitalize}}</span></td>
+                                            <td>{{ calculateDuration(report.createdAt, report.updatedAt)}}</td>
+                                            <td>{{ report.fees}}</td>
+                                            <td>{{ report.description}}</td>
+                                        </tr> -->
+                                        <tr dir-paginate="report in reports | itemsPerPage: pageSize as filteredLength" current-page="currentPage" total-items="total">
+                                            <td ng-repeat="(key,val) in report">{{ val  | capitalize}}</td> 
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-right">
+                                <dir-pagination-controls boundary-links="true" on-page-change="pageChangeHandler(newPageNumber, q, SelectedVenueName, selectedParameter)"></dir-pagination-controls>
+                            </div>
+                            <div class="reportLoader" ng-if="loadRunner">
+                                <div class="load-btn">
+                                    <div class="sk-spinner sk-spinner-wave">
+                                        <div class="sk-rect1"></div>
+                                        <div class="sk-rect2"></div>
+                                        <div class="sk-rect3"></div>
+                                        <div class="sk-rect4"></div>
+                                        <div class="sk-rect5"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <table datatable="ng" dt-options="dtOptions" class="table table-striped table-bordered table-hover dataTables-example">
+                        <thead>
+                            <tr>
+                                <th ng-repeat="disp in excellFormatedData" ng-if="disp.name != 'All'">{{disp.displayName}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="report in reports">
+                                <td ng-repeat="(key,val) in report">{{ val  | capitalize}}</td> 
+                            </tr>
+                        </tbody>
+                    </table> -->
+                </div>
+            </div> 
+        </div>
+        <div class="ibox-content" ng-if="$user.role == 'admin'">
+            <div class="ibox-content" ng-if="reports.length > 0">
+                <div class="row">
+                    <div class="col-lg-12 white-bg">
+                        <div class="row m-t-md m-b-md">
+                            <div class="col-lg-6 text-left m-t-lg">
+                                <p>No of entries: <strong>{{total}}</strong></p>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="search">Select search by:</label>
+                                <select class="form-control" ng-init="selectedParameter='parkingID'" ng-model="selectedParameter">
+                                    <option value="parkingID" selected>Token Number</option>
+                                    <option value="plateNumber">Plate Number</option>
+                                    <option value="brand">Brand</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="search">Search:</label>
+                                <input type="text" ng-model="searchQuery" class="form-control" ng-keyup="enterKeyFunforAdmin(newPageNumber, searchQuery, SelectedVenueName, selectedParameter, $event)" placeholder="Search by {{(selectedParameter=='parkingID')? 'token number':(selectedParameter=='plateNumber' ? 'plate number' : selectedParameter) }}">
+                                <button ng-if="searchQuery != ''" ng-click="clearSearchedReportforAdmin(newPageNumber, q, SelectedVenueName, selectedParameter)">Clear</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket No</th>
+                                        <th>Plate Number</th>
+                                        <th>Parking Location</th>
+                                        <th>Car Model</th>
+                                        <th>Colour</th>
+                                        <th>Check In Date</th>
+                                        <th>TIme In</th>
+                                        <th>CVA In</th>
+                                        <th>Check Out Date</th>
+                                        <th>Time Out</th>
+                                        <th>CVA Out</th>
+                                        <th>Duration</th>
+                                        <th>Fees</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="report in reports | itemsPerPage: pageSize as filteredLength" current-page="currentPage" total-items="total">
+                                        <td>{{ report.parkingID | capitalize}}</td>
+                                        <td>{{ report.plateNumber | capitalize}}</td>
+                                        <td>{{ report.parkingZone | capitalize}}</td>
+                                        <td>{{ report.brand | allUpperCase}}</td>
+                                        <td>{{ report.color | allUpperCase}}</td>
+                                        <td>{{ report.createdAt | date : 'dd MMM yyyy'}}</td>
+                                        <td>{{ report.createdAt | date : 'HH:mm'}}</td>
+                                        <td> <span ng-if="report.log[0].employeeName"></span>{{ report.log[0].employeeName | capitalize}}</span>
+                                        </td>
+                                        <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.updatedAt  | date : 'dd MMM yyyy'}}</span></td>
+                                        <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.updatedAt  | date : 'HH:mm'}}</span></td>
+                                        <td> <span ng-if="report.log[report.log.length - 1].activity == 'completed'">{{ report.log[report.log.length - 1].employeeName  | capitalize}}</span></td>
+                                        <td>{{ calculateDuration(report.createdAt, report.updatedAt)}}</td>
+                                        <td>{{ report.fees}}</td>
+                                        <td>{{ report.description}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-right">
+                            <dir-pagination-controls boundary-links="true" on-page-change="pageChangeHandlerforAdmin(newPageNumber, q, SelectedVenueName, selectedParameter)"></dir-pagination-controls>
+                        </div>
+                        <div class="reportLoader" ng-if="loadRunner">
+                            <div class="load-btn">
+                                <div class="sk-spinner sk-spinner-wave">
+                                    <div class="sk-rect1"></div>
+                                    <div class="sk-rect2"></div>
+                                    <div class="sk-rect3"></div>
+                                    <div class="sk-rect4"></div>
+                                    <div class="sk-rect5"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeIn" id="openMailModal" tabindex="-1" role="dialog" aria-hidden="true" ng-controller="loginCtrl">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Email</h3>
+                        <form role="form" name="sendEmail" ng-submit="sendReport(userEmail);">
+                            <div class="form-group">
+                                <label>To</label>
+                                <input type="email" class="form-control" name="email" placeholder="Enter your email to send report" ng-model="userEmail" required>
+                                    <label class="error" ng-show="sendEmail.email.$error.email">Not valid email!.</label>
+                                  <br>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit"><strong>Send</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Cancel</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

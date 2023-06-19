@@ -1,0 +1,119 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Customer Types</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li>
+                <a>Settings</a>
+            </li>
+            <li class="active">
+                <strong>Customer Types</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+    </div>
+</div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Add Customer Type</h2>
+                    <p>
+                        Add customer type to your account
+                    </p>
+                    <div class="input-group">
+                        <input type="text" placeholder="Add customer" class="input form-control" ng-model="newUserType">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn btn-primary"
+                                ng-click="postAccountUserType(newUserType)"> Add Customer Type</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="ibox border">
+                <div class="ibox-content">
+                    <h2>Customer Type List</h2>
+                    <div class="full-height-scroll" full-scroll>
+                        <div class="table-responsive">
+                            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="15">
+                                <tbody>
+                                    <tr ng-repeat="customer in $user.accountID.customerTypes track by $index">
+                                        <td>
+                                            {{customer}}
+                                        </td>
+                                        <td class="text-right">
+                                            <div>
+                                                <button class="btn-white btn btn-xs"
+                                                    ng-click="removeCustomerType(customer, $index)">Delete</button>
+                                                <button class="btn-primary btn btn-xs"
+                                                    ng-if="customer.toLowerCase() === 'vip'"
+                                                    ng-click="openVIPmodal()">VIP</button>
+                                                <!-- <button class="btn-white btn btn-xs" ng-click="open(venueDetails);">Edit</button> -->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <div class="modal animated fadeIn" id="venuEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Edit Venue</h3>
+                        <p>Enter venue name to update</p>
+                        <form role="form" ng-submit="editVenueName(venueDetails)">
+                            <div class="form-group">
+                                <label>Venue</label> <input type="text" placeholder="Enter Venue" class="form-control" ng-model="venueDetails.venueName">
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit"><strong>Update</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Close</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="modal animated fadeIn" id="vipModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Edit VIP Amount</h3>
+                        <p>Enter VIP Amount to update</p>
+                        <form role="form" ng-submit="editVIPamount(VIP.vipAmount)">
+                            <div class="form-group">
+                                <label>Amount</label> <input type="number" placeholder="Enter Amount"
+                                    class="form-control" ng-model="VIP.vipAmount">
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5"
+                                    ng-click="closeVIPmodal()"><strong>Close</strong></button>
+                                <button class="btn btn-sm btn-primary pull-right"
+                                    type="submit"><strong>Update</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

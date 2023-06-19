@@ -1,0 +1,349 @@
+<div class="row wrapper border-bottom white-bg page-heading" ng-init="getOnlineUsers()">
+    <div class="col-lg-6">
+        <h2>Admin Dashboard</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Dashboard</strong>
+            </li>
+        </ol>
+    </div>
+    <div  class="col-lg-6 m-t-md">
+        <div class="col-lg-offset-3 col-lg-8" ng-if="selectedAccountforAdmin.accountID">
+            <label>Select Account: </label>
+            <div>
+                <ui-select ng-model="selectedAccountforAdmin.accountID" theme="bootstrap" reset-search-input="false" ng-change="getAccountDashboardInfo(selectedAccountforAdmin.accountID)">
+                    <ui-select-match class="ui-select-match" placeholder="Select Account">{{$select.selected.accountName}}
+                        <span ng-if="!$select.selected.accountName">All Account</span>
+                        <a ng-if="$select.selected.accountName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)">
+                            <i class="glyphicon glyphicon-remove"></i>
+                        </a>
+                    </ui-select-match>
+                    <ui-select-choices class="ui-select-choices" repeat="account in accountListforAdmin" refresh="refreshResults($select)"
+                        refresh-delay="0">
+                        <div ng-bind-html="account.accountName | highlight: $select.search"></div>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>   
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight" ng-if="!selectedAccountforAdmin.accountID">
+    <div class="row">
+        <div class="col-lg-12" class="jumbotron">
+            <div class="text-center">
+                <h1>Select Account</h1>
+                <p>This component which allows you to easily view account transactions</p> 
+            </div>
+            <div class="col-lg-offset-4 col-lg-4">
+                <div class="center">
+                    <div>
+                        <ui-select ng-model="selectedAccountforAdmin.accountID" theme="bootstrap" reset-search-input="false" ng-change="getAccountDashboardInfo(selectedAccountforAdmin.accountID)">
+                            <ui-select-match class="ui-select-match" placeholder="Select Account">{{$select.selected.accountName}}
+                                <span ng-if="!$select.selected.accountName">All Account</span>
+                                <a ng-if="$select.selected.accountName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)">
+                                    <i class="glyphicon glyphicon-remove"></i>
+                                </a>
+                            </ui-select-match>
+                            <ui-select-choices class="ui-select-choices" repeat="account in accountListforAdmin" refresh="refreshResults($select)" refresh-delay="0">
+                                <div ng-bind-html="account.accountName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h1>Online Users</h1>                    
+                </div>
+                <div class="m-t-sm">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h4><strong>Online Users</strong> 
+                                <div class="pull-right" ng-click="getOnlineUsers()">
+                                    <a href="" class="btn"> 
+                                        <i class="fa fa-refresh fa-2x text-danger"></i> 
+                                    </a>
+                                </div>
+                            </h4>
+                            <h1 count-to="{{onlineUsers}}" duration="4" count-from="0"></h1>
+                            <div class="stat-percent font-bold">
+                                <i class="fa fa-circle text-navy"></i> Online
+                            </div>
+                            <small>Total Online User</small>
+                        </div>
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight" ng-if="selectedAccountforAdmin.accountID">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-car fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span> Total Cars in
+                            <br>Process / Processed</span>
+                        <h2 class="font-bold">
+                            <span count-from="0" count-to="{{dashboardDatumAdminforWidgets.parked + dashboardDatumAdminforWidgets.requested + dashboardDatumAdminforWidgets.complete}}"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-product-hunt fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span> Total Cars in
+                            <br> Parked State</span>
+                        <h2 class="font-bold">
+                            <span count-from="0" count-to="{{dashboardDatumAdminforWidgets.parked}}"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-registered fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total Cars in
+                            <br> Requested State</span>
+                        <h2 class="font-bold">
+                            <span count-from="0" count-to="{{dashboardDatumAdminforWidgets.requested}}"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="widget style1 navy-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-road fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total Cars in
+                            <br> Completed State</span>
+                        <h2 class="font-bold">
+                            <span count-from="0" count-to="{{dashboardDatumAdminforWidgets.complete}}"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>   
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="widget style1 lazur-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-map-marker fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span>Total Venue</span>
+                        <h2 class="font-bold">
+                            <span count-from="0" count-to="{{selectedAccountforAdmin.accountID.venues.length}}"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="widget style1 yellow-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-user fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span> Total Users</span>
+                        <h2 class="font-bold">
+                            <span count-from="0" count-to="{{dashboardDatumAdmin[2].users}}"></span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="widget style1 yellow-bg">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <i class="fa fa-user fa-5x"></i>
+                    </div>
+                    <div class="col-xs-8 text-right">
+                        <span> Total Supervisor / Chauffures </span>
+                        <h2 class="font-bold" ng-if="dashboardDatumAdmin[2].userCount">
+                            <span count-from="0" count-to="{{dashboardDatumAdmin[2].userCount}}"></span>
+                        </h2>
+                        <h2 class="font-bold" ng-if="!dashboardDatumAdmin[2].userCount">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>        
+    </div> 
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="ibox float-e-margins m-t-sm border">
+                <div class="ibox-title">
+                    <h5>This Month Transactions</h5>
+                    <div class="text-right">
+                        <div data-toggle="buttons" class="btn-group">
+                            <label class="btn btn-sm btn-white" ng-click="carDataforAdminforAccount('count', selectedAccountforAdmin.accountID)">
+                                <input type="radio" id="option1" name="options"> Car Transaction </label>
+                            <label class="btn btn-sm btn-white" ng-click="carDataforAdminforAccount('fees', selectedAccountforAdmin.accountID)">
+                                <input type="radio" id="option2" name="options"> Fees Collected </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="ibox-content" ng-class="{ 'h-250'  : (!adminDashboardNVD3 || adminDashboardNVD3.length ==null) }">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <nvd3 options="optionsNVD3Dashboard" ng-if="adminDashboardNVD3.length > 0" chart-colors="lineColor" data="adminDashboardNVD3"
+                                class="with-3d-shadow with-transitions"></nvd3>
+                        </div>
+                    </div>
+                    <div class="row center-text-chart" ng-if="(!adminDashboardNVD3 || adminDashboardNVD3.length ==null) && !loading" class="widthheigh">
+                        <p class="text-muted text-center">No Data Available </p>
+                    </div>
+                    <div class="row center-text-chart" ng-if="loading && adminDashboardNVD3.length == 0" class="widthheigh">
+                        <div class="spiner-example" style="padding-top:10px!important;">
+                            <div class="sk-spinner sk-spinner-three-bounce">
+                                <div class="sk-bounce1"></div>
+                                <div class="sk-bounce2"></div>
+                                <div class="sk-bounce3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="col-lg-12 p-r-0 padding-0">
+                <div class="widget style1 red-bg">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <i class="fa fa-money fa-5x"></i>
+                        </div>
+                        <div class="col-xs-8 text-right">
+                            <span> Today Fee
+                                <br> Collected </span>
+                            <h2 class="font-bold" ng-if="dashboardDatumAdmin[1].fees != null">
+                                <span count-from="0" count-to="{{dashboardDatumAdmin[1].fees.toFixed(0)}}"></span>
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                            <h2 class="font-bold" ng-if="dashboardDatumAdmin[1].fees == null"> 0
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 p-r-0 padding-0">
+                <div class="widget style1">
+                    <div class="row">
+                        <div class="col-xs-4 text-center">
+                            <i class="fa fa-money fa-5x"></i>
+                        </div>
+                        <div class="col-xs-8 text-right">
+                            <span> Total Fees Collected</span>
+                            <h2 class="font-bold" ng-if="dashboardDatumAdmin[0].fees != null">
+                                <span count-from="0" count-to="{{dashboardDatumAdmin[0].fees.toFixed(0)}}"></span>
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                            <h2 class="font-bold" ng-if="dashboardDatumAdmin[0].fees == null"> 0
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Dubai'">&#x62f;&#x2e;&#x625;</span>
+                                <span ng-if="selectedAccountforAdmin.accountID.timeZone == 'Asia/Kolkata'">&#8377;</span>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 p-r-0 padding-0">
+                <div class="widget lazur-bg">
+                    <h2>
+                        {{selectedAccountforAdmin.accountID.accountName}}
+                    </h2>
+                    <ul class="list-unstyled m-t-xs">
+                        <li>
+                            <span class="fa fa-map-marker m-r-xs"></span>
+                            <label>Zone : </label> &nbsp;{{selectedAccountforAdmin.accountID.timeZone}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">        
+        <div class="col-lg-12 padding-0">  
+            <div class="col-lg-4">
+                <div class="ibox float-e-margins m-t-sm border">
+                    <div class="ibox-title">
+                        <h5>Device Information
+                        </h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <form role="form">
+                                    <div class="form-group">
+                                        <label>Select Venue:</label>
+                                        <ui-select ng-model="SelectedVenueNameforDeviceInfo.venue" theme="bootstrap" reset-search-input="false">
+                                            <ui-select-match class="ui-select-match" placeholder="All Venue">{{$select.selected.venueName}}
+                                                <span ng-if="!$select.selected.venueName">All Venue</span>
+                                                <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)">
+                                                    <i class="glyphicon glyphicon-remove"></i>
+                                                </a>
+                                            </ui-select-match>
+                                            <ui-select-choices class="ui-select-choices" repeat="venueDetails in selectedAccountforAdmin.accountID.venues" refresh="refreshResults($select)"
+                                                refresh-delay="0">
+                                                <div ng-bind-html="venueDetails.venueName | highlight: $select.search"></div>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Select Date:</label>
+                                        <div class="input-group date">
+                                            <input type="datetime" class="form-control" date-time ng-model="dashboardDate.date" view="date" auto-close="true" min-view="date"
+                                                format="YYYY-MM-DD">
+                                            <span class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-primary" ng-click="getDeviceInformation(SelectedVenueNameforDeviceInfo.venue,dashboardDate.date, selectedAccountforAdmin.accountID)">
+                                            <strong>Submit</strong>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>                
+            </div>
+            <div class="col-lg-offset-1 col-lg-6">
+                <div class="p-lg">
+                    <canvas id="pie" class="chart chart-pie" chart-data="pieDashboardData" chart-labels="dashboardPieLabels" chart-options="dashboardOptions"
+                        chart-colors="dashboardPieChartColors" height="200">
+                    </canvas>
+                </div>
+            </div>            
+        </div>
+    </div>
+</div>

@@ -1,0 +1,132 @@
+<div ng-if="$user.role=='accountadmin'" id="right-sidebar" ng-show="rightSidebar" class="sidebar-open animated slideInRight" ng-controller="accountsettingCtrl">
+    <div class="sidebar-container" full-scroll>
+        <ul class="nav nav-tabs navs-3">
+            <!-- <li ng-class="{active: tab1}"><a ng-click="tab1 = true; tab2 = false; tab3 = false" ng-init="tab1 = true">
+                Notes
+            </a></li>
+            <li ng-class="{active: tab2}"><a ng-click="tab2 = true; tab1 = false; tab3 = false">
+                Projects
+            </a></li> -->
+            <li class="full-width">
+                <a class="text-left">
+                    <i class="fa fa-gear"></i> Account Settings
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active">
+                <div class="sidebar-title">
+                    <h3><i class="fa fa-gears"></i> Settings</h3>
+                    <small><i class="fa fa-tim"></i> A simple way to customize the application.</small>
+                </div>
+                <div class="setings-item">
+                    <span>
+                        Access barcode
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example" ng-model="$user.accountID.barCodeAccess" ng-click="allowBarcodeAccesstoThisAccount();">
+                            <label class="onoffswitch-label" for="example">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setings-item">
+                    <span>
+                        Access camera
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="collapsemenu" checked class="onoffswitch-checkbox" id="example2" ng-model="$user.accountID.cameraAccess" ng-click="allowCameraAccesstoThisAccount();">
+                            <label class="onoffswitch-label" for="example2">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setings-item">
+                    <span>
+                        Automated plate number capturing
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example3" ng-model="$user.accountID.readPlateNumber" ng-click="allowReadPlateNumberThisAccount();" checked="checked">
+                            <label class="onoffswitch-label" for="example3">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setings-item">
+                    <span>
+                        Access camera for getting CED snap
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" checked name="collapsemenu" class="onoffswitch-checkbox" id="example4" ng-model="$user.accountID.CEDAccess" ng-click="allowCEDAccesstoThisAccount();"  checked="checked"   >
+                            <label class="onoffswitch-label" for="example4" >
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setings-item">
+                    <span>
+                       Vehicle claim check
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" checked name="collapsemenu" class="onoffswitch-checkbox" id="example5" ng-model="$user.accountID.markImage" ng-click="allowMarkImageAccesstoThisAccount();" checked="checked">
+                            <label class="onoffswitch-label" for="example5">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setings-item">
+                    <span>
+                       Receive push notification
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" checked name="collapsemenu" class="onoffswitch-checkbox" id="example6" ng-model="$user.accountID.pushNotification" ng-click="allowPushNotificationAccesstoThisAccount();" checked="checked">
+                            <label class="onoffswitch-label" for="example6">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setings-item">
+                    <span>
+                        Vibrating alert for notification
+                    </span>
+                    <div class="switch">
+                        <div class="onoffswitch">
+                            <input type="checkbox" name="collapsemenu" class="onoffswitch-checkbox" id="example7" ng-model="$user.accountID.vibrate" ng-click="allowvibrateAccesstoThisAccount();" checked="checked">
+                            <label class="onoffswitch-label" for="example7">
+                                <span class="onoffswitch-inner"></span>
+                                <span class="onoffswitch-switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-content">
+                    <h4>Settings</h4>
+                    <div class="small">
+                        Customize the application based on your requirement with above features. This facility is available to Account Admin and Managers only.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,338 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-4">
+        <h2>Car Transaction Details</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Car Details</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-6 text-left">
+        <div ng-if="parkedProfile.status=='requested' || parkedProfile.status=='accept' && !parkedProfile.free && parkedProfile.fees > 0">
+            <button class="btn btn-outline btn-success m-t-25" ng-click="printTicketorBill('guestPrint', parkedProfile)">Guest Print</button>
+            <button class="btn btn-outline btn-primary m-t-25" ng-click="printTicketorBill('chauffeurPrint', parkedProfile)">Cashier Print</button>
+            <!-- <button class="btn btn-warning m-t-25" ng-click="printTicketorBill('billPrint', parkedProfile);">Bill Print</button> -->
+        </div>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn red-bg m-t-25" ng-if="parkedProfile.free && parkedProfile.venue.settings.reverseCarState && parkedProfile.status!='parked'" ng-click="reversetheCarState(parkedProfile);">
+            <i class="fa fa-history" aria-hidden="true"></i> Reverse
+        </button>
+        <button class="btn btn-default m-t-25" ui-sref="{{previousState.name}}">Back</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-offset-2 col-lg-8">
+            <div class="row m-b-lg m-t-lg">
+                <div class="text-center">
+                    <div class="col-lg-12">
+                        <div class="pattern-bg p-md b-t-r-r-10 b-t-l-r-10">
+                            <img ng-if="!parkedProfile.snap || parkedProfile.snap =='noImage'" class="img-circle circle-border m-b-md" src="img/Anon.jpg">
+                            <img ng-if="parkedProfile.snap && parkedProfile.snap!='noImage'" class="img-circle circle-border m-b-md" ng-src='{{ipAddress}}/images/{{parkedProfile.snap}}' on-error-src ng-click="showimage(0, parkedProfile);">
+                            <br>
+                            <div ng-show="parkedProfile.scratchesSnap.length > 0">
+                                <div ng-repeat="image in parkedProfile.scratchesSnap track by $index">
+                                    <a ng-href="{{ipAddress}}/images/{{image}}" target="_blank" title="Image from Unsplash">
+                                        <img ng-if="image" class="img-circle" width="50px" ng-src="{{ipAddress}}/images/{{image}}" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-12 pattern-bg">
+                            <div class="col-lg-4 p-xs">
+                                <h3 class="m-b-0 all-caps">{{parkedProfile.parkingID}}</h3>
+                                <h5 class="">Ticket Number</h5>
+                            </div>
+                            <div class="col-lg-4 p-xs">
+                                <h3 class="m-b-0 all-caps">{{parkedProfile.otherInfo ? parkedProfile.otherInfo.plateNumber : parkedProfile.plateNumber}}</h3>
+                                <h5 class="">Plate Number</h5>
+                            </div>
+                            <div class="col-lg-4 p-xs">
+                                <h3 class="m-b-0 all-caps">{{parkedProfile.parkingZone}}</h3>
+                                <h5 class="">Parking Zone</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12" ng-if="parkedProfile.brand || parkedProfile.remarks">
+                    <div class="contact-box padding-5 m-b-0">
+                        <a ng-click="searchandSelectModalforCarModels(null, 'addBrand')">
+                            <div class="col-sm-2">
+                                <div class="text-left">
+                                    <img ng-if="!parkedProfile.brand || parkedProfile.brand == 'undefined' || parkedProfile.brand == 'null'" alt="image" class="img-circle m-t-xs" width="50px" src="img/unknownCar.png">
+                                    <img ng-if="parkedProfile.brand &&  parkedProfile.brand != 'undefined' && parkedProfile.brand != 'null'" class="m-t-xs" ng-src="img/brands/{{parkedProfile.brand}}.png" width="50px" />
+                                </div>
+                            </div>
+                            <div class="col-sm-8 text-left">
+                                <h3 class="m-t-10" ng-if="parkedProfile && parkedProfile.brand!= 'undefined'"> Brand Name </h3>
+                                <h3 ng-if="!parkedProfile || parkedProfile.brand == 'undefined'">Brand Name</h3>
+                                <div>
+                                    <p ng-if="parkedProfile  && parkedProfile.brand!= 'undefined'">
+                                        <span>{{parkedProfile.brand | capitalize}}</span>
+                                    </p>
+                                    <p ng-if="parkedProfile  && parkedProfile.modelName!= 'undefined'">
+                                        <strong>Model Name:</strong><span> {{parkedProfile.modelName | capitalize}} </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <img ng-if="parkedProfile.color && parkedProfile.color !='undefined'" class="img-circle m-t-xs" width="50px" ng-src="img/colors/{{parkedProfile.color}}.png" />
+                            </div>
+                            <div class="clearfix"></div>
+                        </a>
+                    </div>
+                    <div class="contact-box padding-10 m-b-0 text-left" ng-if="parkedProfile.remarks && parkedProfile.remarks != 'undefined' && parkedProfile.remarks != 'null'">
+                        <h3>Remarks:</h3>
+                        <p>{{parkedProfile.remarks | capitalize}}</p>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="contact-box padding-5 m-b-0">
+                        <a>
+                            <div class="col-sm-2">
+                                <div class="text-left">
+                                    <img alt="image" class="img-circle m-t-xs" width="50px" src="img/unknown.png">
+                                </div>
+                            </div>
+                            <div class="col-sm-10 text-left">
+                                <h3 class="m-t-10">Recently updated by :</h3>
+                                <div>
+                                    <p>
+                                        <span>
+                                            <p>{{parkedProfile.loginAs | capitalize}}</p>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="ibox-content inspinia-timeline">
+                        <div ng-repeat="event in parkedProfile.log | orderBy: 'at'">
+                            <div class="timeline-item" ng-if="event.activity=='parked' || event.activity=='requested' ||  event.activity=='accept' || event.activity=='ready' || event.activity=='completed' ||  event.activity=='specialRequest'">
+                                <div class="row m-l-xl">
+                                    <div class="col-xs-4 date">
+                                        <i class="timeline-dot fa fa-stop" ng-style="event.activity=='parked' && {'color':'#055aa5'} || event.activity=='requested' && {'color':' red'} || event.activity=='accept' && {'color':'yellow'} || event.activity=='completed' && {'color':'green'} || event.activity=='specialRequest' && {'color':'#fb6c10'} || event.activity=='ready' && {'color':'rgb(10, 193, 10)'}"></i>                                        {{event.at | date: 'MMM dd' }}
+                                        <br/>
+                                        <small class="text-navy">{{event.at | date:'h:mm a'}}</small>
+                                    </div>
+                                    <div class="col-xs-8 content no-top-border">
+                                        <div class="social-avatar padding-0 m-l-lg">
+                                            <a href="" class="pull-left">
+                                                <img ng-if="event.activity=='requested' && !event.userProfile" class="img-circle" ng-src="img/geust.jpg">
+                                                <img ng-if="event.activity!='parked' && event.userProfile && event.activity!='accept'  && event.activity!='completed'" class="img-circle" ng-src='{{ipAddress}}/images/{{event.userProfile}}' on-error-src-user/>
+                                                <img ng-if="(event.activity=='accept' && event.userProfile) || (event.activity=='completed' && event.userProfile)" class="img-circle" ng-src='{{ipAddress}}/images/{{event.userProfile}}' on-error-src-user/>
+                                                <img ng-if="(event.activity=='accept' && !event.userProfile) || (event.activity=='completed' && !event.userProfile)" class="img-circle" ng-src='img/unknown.png' />
+                                                <div ng-if="event.activity=='parked'">
+                                                    <img class="img-circle" ng-if="!event.userProfile && parkedProfile.log[0].by != 'Unassigned'" src="img/unknown.png">
+                                                    <img ng-if="event.userProfile && event.userProfile.indexOf('http') == -1" class="img-circle" on-error-src-user ng-src='{{ipAddress}}/images/{{event.userProfile}}' />
+                                                    <img ng-if="event.userProfile && event.userProfile.indexOf('http') == 0" class="img-circle" on-error-src-user ng-src='{{event.userProfile}}' />
+                                                    <img ng-if="parkedProfile.log[0].by == 'Unassigned'" class="img-circle" on-error-src-user ng-src='img/question_user.jpg' />
+                                                </div>
+                                                <img ng-if="(event.activity=='specialRequest' && event.userProfile)" class="img-circle" ng-src='{{ipAddress}}/images/{{event.userProfile}}' />
+                                                <img ng-if="(event.activity=='specialRequest' && !event.userProfile)" class="img-circle" ng-src='img/unknown.png' />
+                                            </a>
+                                            <div class="media-body">
+                                                <h3 ng-if="event.activity != 'accept' && event.activity != 'specialRequest' && event.activity != 'requested' ">{{event.activity | capitalize}} by</h3>
+                                                <h3 ng-if="event.activity == 'requested' && event.specialRequest">Special request by</h3>
+                                                <h3 ng-if="event.activity == 'requested' && !event.specialRequest">Requested by</h3>
+                                                <h3 ng-if="event.activity == 'specialRequest'">Special request confirmed by</h3>
+                                                <h3 ng-if="( event.by == 'Unassigned' || event.by == '' || event.by == undefined  || event.by == null) && event.activity=='parked'">Unknown</h3>
+                                                <h5 ng-if="event.activity!='requested' && event.activity != 'accept'">{{event.employeeName | capitalize}}</h5>
+                                                <div class="row" ng-if="event.activity == 'accept' && !event.assignedBy">
+                                                    <div class="col-lg-6">
+                                                        <h3 ng-if="event.activity == 'accept'">Accepted by</h3>
+                                                        <h5 ng-if="event.activity =='accept'">{{event.employeeName | capitalize}}</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row" ng-if="event.activity == 'accept' && event.assignedBy">
+                                                    <div class="col-lg-6">
+                                                        <h3 ng-if="event.activity == 'accept'">Assigned to</h3>
+                                                        <h5 ng-if="event.activity =='accept'">{{event.employeeName | capitalize}}</h5>
+                                                    </div>
+                                                    <div class="col-lg-6 assigned-bar">
+                                                        <h3 ng-if="event.activity == 'accept' && event.assignedBy">Assigned by</h3>
+                                                        <h5 ng-if="event.activity == 'accept' && event.assignedBy">{{event.assignedBy | capitalize}}</h5>
+                                                    </div>
+                                                </div>
+                                                <span ng-if="event.activity=='requested'">
+                                                    <h5 ng-if="event.by != 000000000">{{event.by | capitalize }}</h5>
+                                                </span>
+                                                <span ng-if="event.activity=='requested'">
+                                                    <h5 ng-if="event.by == 000000000">Guest</h5>
+                                                </span>
+                                                <div ng-if="event.specialRequest">
+                                                    <div class="spl" style="width:100%;background: #ececec;">
+                                                        <h5 ng-if="event.activity == 'requested' && event.specialRequest"> Car required @
+                                                            <h4> {{event.specialRequest.dateTime | tyday }} {{event.specialRequest.dateTime | date:'h:mm a' }} </h4>
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timeline-item" ng-if="(event.activity=='parkingID' && parkedProfile.parkingID != event.changes) || (event.activity=='plateNumber' && parkedProfile.plateNumber != event.changes) || ( event.activity=='parkingZone') || event.activity=='validateTicket' || event.activity=='cashCollect'">
+                                <div class="row m-l-xl">
+                                    <div class="col-xs-4 date">
+                                        <i class="timeline-dot fa fa-stop blue-time-dot" ng-style="event.activity=='validateTicket' && { 'color':'#055aa5'} ||  event.activity =='cashCollect' && { 'color':'red'}"></i> {{event.at | date: 'MMM dd' }}
+                                        <br/>
+                                        <small class="text-navy">{{event.at | date:'h:mm a'}}</small>
+                                    </div>
+                                    <div class="col-xs-8 content no-top-border">
+                                        <div class="social-avatar padding-0 m-l-lg">
+                                            <a href="" class="pull-left">
+                                                <img ng-if="!event.loginUser || !event.loginUser.userProfile" class="img-circle m-t-xs" src="img/unknown.png">
+                                                <img ng-if="event.loginUser && event.loginUser.userProfile" class="img-circle m-t-xs" ng-src='{{ipAddress}}/images/{{event.loginUser.userProfile}}' on-error-src-user/>
+                                            </a>
+                                            <div class="media-body">
+                                                <h3 ng-if="event.activity=='parkingID'">Ticket Number Updated</h3>
+                                                <h3 ng-if="event.activity=='parkingZone'">Zone Updated</h3>
+                                                <h3 ng-if="event.activity=='plateNumber'">Number Plate Updated</h3>
+                                                <h3 ng-if="event.activity=='validateTicket'">Ticket Validated @ {{event.loginUser.outletName | capitalize}} </h3>
+                                                <h3 ng-if="event.activity=='cashCollect'">Cash Collected</h3>
+                                                <span ng-if="event.activity=='parkingID' && parkedProfile.parkingID != event.changes">
+                                                    <h5>{{event.changes | allUpperCase}}</h5>
+                                                </span>
+                                                <span ng-if="event.activity=='plateNumber' && parkedProfile.plateNumber != event.changes">
+                                                    <h5>{{event.changes | allUpperCase}}</h5>
+                                                </span>
+                                                <span ng-if="event.activity=='parkingZone'">
+                                                    <h5>{{event.changes | allUpperCase}}</h5>
+                                                </span>
+                                                <span ng-if="event.activity=='validateTicket'">
+                                                    <h5>Ticket Validated By: {{event.loginUser.userName | capitalize}}  ({{event.loginUser.validationType | capitalize}})</h5>
+                                                </span>
+                                                <span ng-if="event.activity=='cashCollect'">
+                                                    <h5>Cash Collected By: {{event.loginUser.userName | capitalize}}</h5>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 text-center">
+                    <div class="col-lg-12 p-md pattern-bg" ng-repeat="event in parkedProfile.log" ng-if="event.missedUserName">
+                        <h2 class="m-t-0">Oscar Card Missed</h2>
+                        <div class="col-lg-6">
+                            <h3>Guest Name</h3>
+                            <p>{{event.missedUserName}}</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <h3>Guest Mobile</h3>
+                            <p>{{event.missedUserMobile}}</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 pattern-bg">
+                        <a ng-href="{{ipAddress}}/images/{{image}}" ng-repeat="image in event.proofs" target="_blank">
+                            <img class="img-lg document-img" ng-src="{{ipAddress}}/images/{{image}}" ng-click="proofImage($index, event.proofs);">
+                        </a>
+                    </div>
+                    <!-- <div class="col-lg-12 p-md pattern-bg" ng-if="parkedProfile.fees > 0 && (parkedProfile.venue.settings.verifyOption && !parkedProfile.free)">
+                        <div class="col-lg-6 text-center">
+                            <strong>Yes</strong>
+                            <br>
+                            <spn>Fee collected ?</spn>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <h3>Parking Fees</h3>
+                            <p>{{parkedProfile.fees}}</p>
+                        </div>
+                    </div> -->
+                    <div class="col-lg-12  p-md pattern-bg" ng-if="parkedProfile.venue.settings.initialBillPrint && !parkedProfile.free">
+                        <div class="col-lg-6 text-center">
+                            <strong ng-if="parkedProfile.amountPaid">Yes</strong>
+                            <strong ng-if="!parkedProfile.amountPaid">No</strong>
+                            <br>
+                            <spn>Fee collected ?</spn>
+                        </div>
+                        <div class="col-lg-6 text-center">
+                            <strong ng-if="parkedProfile.fees">{{parkedProfile.fees}}</strong>
+                            <br>
+                            <spn>Parking fees</spn>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 padding-0 p-md pattern-bg" ng-if="!parkedProfile.free && parkedProfile.fees >= 0 && parkedProfile.venue.settings.verifyOption">
+                        <div class="col-lg-12 text-center p-md" ng-if="parkedProfile.fees==0">
+                            <div class="text-center">
+                                <h3>Parking Fees</h3>
+                                <p>{{parkedProfile.fees}}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 p-md" ng-if="parkedProfile.fees!=0">
+                            <div class="text-center">
+                                <h3>Parking Fees</h3>
+                                <p>{{parkedProfile.fees}}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 p-md" ng-if="parkedProfile.fees!=0">
+                            <div class="text-center">
+                                <h3>Payment Type</h3>
+                                <p ng-if="parkedProfile.feeSplitUp.paymentType=='cash' || parkedProfile.feeSplitUp.paymentType=='card'">
+                                    {{parkedProfile.feeSplitUp.paymentType | capitalize}}
+                                    <br>
+                                    <i ng-class="{'fa fa-money':parkedProfile.feeSplitUp.paymentType=='cash','fa fa-credit-card':parkedProfile.feeSplitUp.paymentType=='card'}"
+                                        aria-hidden="true"></i>
+                                </p>
+                                <p ng-if="!parkedProfile.feeSplitUp.paymentType">
+                                    Cash
+                                    <br>
+                                    <i class="fa fa-money"></i>
+                                </p>
+                            </div>
+                        </div>
+                        <div ng-repeat="event in parkedProfile.log">
+                            <div class="col-lg-12 p-md" ng-if="event.missedUserName">
+                                <h2 class="m-t-0">Oscar Card Missed</h2>
+                                <div class="col-lg-6">
+                                    <h3>Guest Name</h3>
+                                    <p>{{event.missedUserName}}</p>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h3>Guest Mobile</h3>
+                                    <p>{{event.missedUserMobile}}</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 p-md" ng-if="event.proofs">
+                                <a ng-href="{{ipAddress}}/images/{{image}}" ng-repeat="image in event.proofs" target="_blank">
+                                    <img class="img-lg document-img" ng-src="{{ipAddress}}/images/{{image}}" ng-click="proofImage($index, event.proofs);">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 p-xs pattern-bg" ng-if="parkedProfile.free || parkedProfile.description">
+                        <h2 class="m-t-0">Outlet Validation</h2>
+                        <div class="col-lg-6">
+                            <h3>Free parking ?</h3>
+                            <p ng-if="parkedProfile.free">Free</p>
+                            <p ng-if="!parkedProfile.free">Paid</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <h3>Description</h3>
+                            <p ng-if="parkedProfile.description">{{parkedProfile.description}}</p>
+                            <p ng-if="!parkedProfile.description">Description not found</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 p-sm pattern-bg" ng-if="parkedProfile.documents">
+                        <a ng-href="{{ipAddress}}/images/{{image}}" ng-repeat="image in parkedProfile.documents" target="_blank">
+                            <img class="img-lg document-img" class="img-md m-t-xs" ng-src="{{ipAddress}}/images/{{image}}" ng-click="proofImage($index, parkedProfile.documents);">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,257 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Daily valet parking system reports</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Chart</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div>
+            <div class="col-sm-12">
+                <div class="ibox border">
+                    <div class="ibox-content">
+                        <h2>Analysis</h2>
+                        <div class="row" ng-if="$user.role == 'admin'" ng-controller="venueCtrl">
+                            <div class="form-group col-lg-6">
+                                <label class="font-normal">Select selected:</label>
+                                <!-- <select class="form-control" ng-model="selected" placeholder="Select Venue" ng-options="account as account.accountName for account in accountWithvenues">
+                                    <option value="" hidden>Select Venue</option>
+                                </select> -->
+                                <ui-select ng-model="selected" theme="bootstrap" reset-search-input="false">
+                                    <ui-select-match placeholder="All Venue">{{$select.selected.accountName}}
+                                        <span ng-if="!$select.selected.accountName">All Venue</span>
+                                        <a ng-if="$select.selected.accountName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)">
+                                            <i class="glyphicon glyphicon-remove"></i>
+                                        </a>
+                                    </ui-select-match>
+                                    <ui-select-choices repeat="account in accountWithvenues | filter: $select.search" refresh="main.refreshResults($select)" refresh-delay="0">
+                                        <div ng-bind-html="account.accountName | highlight: $select.search"></div>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                            <div class="col-lg-6 m-t-24">
+                                <button class="btn btn-primary full-width" ng-click="getReportforAdmin(selected);">Submit</button>
+                            </div>
+                        </div>
+                        <div class="row" ng-if="$user.role != 'admin'" ng-controller="venueCtrl">
+                            <div class="form-group col-lg-4">
+                                <label class="font-normal">Select Venue:</label>
+                                <!-- <select class="form-control" ng-model="selectedOptionsforanAnalysis.venue" placeholder="" ng-options="venueDetails as venueDetails.venueName for venueDetails in venue">
+                                    <option value="">All Venue</option>
+                                </select> -->
+                                <div ng-if="venue.length > 0">
+                                    <ui-select ng-model="selectedOptionsforanAnalysis.venue" theme="bootstrap" reset-search-input="false">
+                                        <ui-select-match placeholder="All Venue">{{$select.selected.venueName}}
+                                            <span ng-if="!$select.selected.venueName">All Venue</span>
+                                            <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)">
+                                                <i class="glyphicon glyphicon-remove"></i>
+                                            </a>
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="venueDetails in venue | custom : $select.search" refresh="refreshResults($select)" refresh-delay="0">
+                                            <div ng-bind-html="venueDetails.venueName | highlight: $select.search"></div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <div ng-if="selectedOptionsforanAnalysis.venue && ($user.role == 'accountinguser' || $user.role == 'chauffeur')">
+                                    {{selectedOptionsforanAnalysis.venue.venueName}}
+                                </div>
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label class="font-normal">Select Type:</label>
+                                <select class="form-control" ng-model="selectedOptionsforanAnalysis.type" placeholder="">
+                                    <option value="" hidden>Select type</option>
+                                    <option value="count">Car Count</option>
+                                    <option value="fees">Fees Collected</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-4 m-t-24 text-center">
+                                <button class="btn btn-primary" ng-click="getAnalysisData(selectedOptionsforanAnalysis)">Submit</button>
+                                <button class="btn btn-primary" id='downloadbody' ng-click="exportFunction()">
+                                    Export as PNG
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12" id="export">
+            <div ng-style="exportShow  && {'background-color':'white'}">
+                <div class="ibox border" ng-if="exportShow">
+                    <div class="ibox-content">
+                        <h2> {{$user.accountID.accountName }} </h2>
+                        <div class="row">
+                            <div class="form-group col-lg-4">
+                                <label class="font-normal">Venue:
+                                    <span ng-if="selectedOptionsforanAnalysis.venue && selectedOptionsforanAnalysis.venue.id">
+                                    {{ selectedOptionsforanAnalysis.venue.venueName }}</span>
+                                    <span ng-if="!selectedOptionsforanAnalysis.venue.id">
+                                    All Venue </span>
+                                </label>
+                            </div>
+                            <div class="form-group col-lg-4">
+                                <label class="font-normal">Exported Date: {{ expotedDate }} </label>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="font-normal">Type : {{selectedOptionsforanAnalysis.type}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div ng-class=" { 'col-lg-4' : (selectedOptionsforanAnalysis.type == 'count') }" ng-if="selectedOptionsforanAnalysis.type=='count'">
+                        <div class="ibox float-e-margins border">
+                            <div class="ibox-title p-xs">
+                                <h3 class="m-b-0">Daily Reports</h3>
+                                <small>Pie chart show daily report details.</small>
+                            </div>
+                            <div class="ibox-content">
+                                <canvas id="pie" class="chart chart-pie" chart-data="pieData" chart-labels="pieLabels" chart-options="options" chart-colors="pieChartColors" height="150">
+                                    </canvas>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-lg-6 m-b-sm">
+                                        <button type="button" class="btn parked m-r-xxs p-xxs"></button> Parked Count
+                                    </div>
+                                    <div class="col-lg-6 m-b-sm">
+                                        <button type="button" class="btn req m-r-xxs p-xxs"></button> Requested Count
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <button type="button" class="btn acc m-r-xxs p-xxs"></button> Accepted Count
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <button type="button" class="btn comp m-r-xxs p-xxs"></button> Completed Count
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-class=" { 'col-lg-8' : (selectedOptionsforanAnalysis.type == 'count'), 'col-lg-12' : (selectedOptionsforanAnalysis.type != 'count')}">
+                        <div class="ibox float-e-margins border">
+                            <div class="ibox-title">
+                                <h3 class="m-b-0">Date Wise Reports ({{selectedYear}}-{{selectedMonth}})
+                                </h3>
+                            </div>
+                            <div class="ibox-content">
+                                <nvd3 options="optionsNVD3" chart-colors="lineColor" data="dataforNVD3" class="with-3d-shadow with-transitions"></nvd3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="ibox float-e-margins border">
+                            <div class="ibox-title">
+                                <h3 class="m-b-0"> Month Wise Reports ({{selectedYear}})
+                                </h3>
+                            </div>
+                            <div class="ibox-content">
+                                <div>
+                                    <canvas id="bar" class="chart chart-bar" chart-data="monthData" chart-labels="monthLables" chart-series="series" chart-colors="barColor" chart-click="monthClicked">
+                                        </canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="ibox float-e-margins border">
+                            <div class="ibox-title">
+                                <h3 class="m-b-0">Year Wise Reports</h3>
+                            </div>
+                            <div class="ibox-content">
+                                <div>
+                                    <canvas id="bar2" class="chart chart-bar" chart-data="yearData" chart-labels="yearLables" chart-series="series" chart-colors="barColor" chart-click="yearClicked">
+                                        </canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tick line {
+        display: none;
+    }
+    
+    /* .nvd3 .nv-groups .nv-point {
+         stroke-opacity: 0.5 !important;
+        stroke-width: 3px; 
+    } */
+    
+    .nv-x text {
+        font-size: 12px;
+        /* fill: #8f8f8f; */
+    }
+    
+    .nv-y text {
+        font-size: 12px;
+        /* fill: #8f8f8f; */
+    }
+    
+    /* .nv-area {
+         fill: #e6e6e6;   
+    } */
+    
+    .has-header {
+        top: 0px;
+    }
+    
+    .b-b {
+        border-bottom: solid 1px lightgray !important;
+    }
+    
+    .card {
+        box-shadow: 0 2px 5px 3px rgba(0, 0, 0, .26);
+    }
+    
+    .parked {
+        color: #dcdcdc;
+    }
+    
+    .req {
+        color: #f7464a;
+    }
+    
+    .spl {
+        color: #fdb45c;
+    }
+    
+    .acc {
+        color: #4d5360;
+    }
+    
+    .comp {
+        color: #949fb1;
+    }
+    
+    .legend {
+        color: #fb6d11;
+    }
+    
+    .bar .title {
+        right: 10px !important;
+    }
+    
+    .chartWrapper {
+        position: relative;
+    }
+    
+    .chartWrapper>canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+    }
+</style>

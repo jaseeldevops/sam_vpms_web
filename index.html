@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html ng-app="oscar">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Page title set in pageTitle directive -->
+    <title page-title></title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font awesome -->
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <!-- Main CSS files -->
+    <link type="text/css" rel="stylesheet" href="css/plugins/toastr/toastr.min.css">
+    <link href="css/animate.css" rel="stylesheet">
+    <link id="loadBefore" href="css/style.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/plugins/ui-select/select.min.css">
+    <link href="css/selection/jquery.selectareas.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="js/dependencies/d3/nv.d3.min.css">
+    <link type="text/css" rel="stylesheet" href="css/plugins/sweetalert/sweetalert.css">
+    <link type="text/css" rel="stylesheet" href="css/plugins/dataTables/datatables.min.css">
+</head>
+<!-- ControllerAs syntax -->
+
+<body class="{{$state.current.data.specialClass}}" landing-scrollspy id="page-top">
+    <toaster-container></toaster-container>
+    <!-- Main view  -->
+    <div ui-view></div>
+    <div style="display:none">
+        <img id="logo" src="img/oscar-logo/logo.png" alt="">
+        <canvas id="canvas" width="512" height="480"></canvas>
+    </div>
+
+    <!-- jQuery and Bootstrap -->
+    <script src="js/jquery/jquery-3.1.1.min.js"></script>
+    <script src="js/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+    <!-- MetsiMenu -->
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <!-- SlimScroll -->
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+    <!-- Custom and plugin javascript -->
+    <script src="js/valeters.js"></script>
+    <!-- Main Angular scripts-->
+    <script src="js/angular/angular.min.js"></script>
+    <script src="js/angular/angular-sanitize.min.js"></script>
+    <script src="js/plugins/oclazyload/dist/ocLazyLoad.min.js"></script>
+    <script src="js/angular-translate/angular-translate.min.js"></script>
+    <script src="js/ui-router/angular-ui-router.min.js"></script>
+    <script src="js/bootstrap/ui-bootstrap-tpls-1.1.2.min.js"></script>
+    <script src="js/plugins/angular-idle/angular-idle.js"></script>
+    <script src="js/dependencies/ng-file-upload.min.js"></script>
+    <script src="js/dependencies/ng-file-upload-shim.min.js"></script>
+    <script src="js/angular-count-to.min.js"></script>
+    <script src="js/ng-infinite-scroll.min.js"></script>
+    <script src="lib/dirPagination.js"></script>
+    <!-- lib -->
+    <script src="js/dependencies/underscore.js"></script>
+    <script src="js/dependencies/moment.min.js"></script>
+    <script src="js/dependencies/moment-timezone.min.js"></script>
+    <script src="lib/angular/angular-local-storage.js"></script>
+    <script src="lib/angular/ngStorage.js"></script>
+    <script src="js/dependencies/angular-touch.min.js"></script>
+    <script src="js/dependencies/d3/d3.min.js" charset="utf-8"></script>
+    <script src="js/dependencies/d3/nv.d3.min.js"></script>
+    <script src="js/dependencies/d3/angular-nvd3.min.js"></script>
+    <script src="lib/angular-scroll-animate/dist/angular-scroll-animate.js"></script>
+    <script src="lib/angular/angular-count-to.min.js"></script>
+    <script src="lib/angular/localNotification.js"></script>
+    <script src="js/epos-print-5.0.0.js"></script>
+    <!--
+        You need to include this script on any page that has a Google Map.
+        When using Google Maps on your own site you MUST signup for your own API key at:
+        https://developers.google.com/maps/documentation/javascript/tutorial#api_key
+        After your sign up replace the key in the URL below..
+    -->
+    <!-- Sials  -->
+    <script type="text/javascript" src="js/sails.io.js"></script>
+    <script type="text/javascript">
+        io.sails.useCORSRouteToGetCookie = false;
+
+        const vpmsApiServerAddress = 'api.vpms.valeters.ae'; 
+        const vpmsApiServerPort = '443';
+
+        io.sails.url = `https://${vpmsApiServerAddress}:${vpmsApiServerPort}`;
+        io.sails.autoConnect = true;
+    </script>
+    <script type="text/javascript">
+        window.paceOptions = {
+            document: true, // disabled
+            eventLag: true,
+            restartOnPushState: true,
+            restartOnRequestAfter: true,
+            /*ajax: {
+                trackMethods: ['POST']
+            }*/
+        };
+    </script>
+    <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQTpXj82d8UpCi97wzo_nKXL7nYrd4G70"></script> -->
+    <!-- Anglar App Script -->
+    <script src="js/app.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/directives.js"></script>
+    <script src="js/plugins/toastr/toastr.min.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/barcode.js"></script>
+    <script src="js/markImage.js"></script>
+    <script src="js/plugins/sweetalert/sweetalert.min.js"></script>
+    <script src="js/plugins/dataTables/datatables.min.js"></script>
+    <script src="js/plugins/sweetalert/angular-sweetalert.min.js"></script>
+    <script src="js/plugins/dom-to-image.js"></script>
+    <!-- Dependencies -->
+    <script src="js/plugins/ui-select/select.min.js"></script>
+    <script src="js/plugins/dataTables/angular-datatables.min.js"></script>
+    <script src="js/plugins/dataTables/angular-datatables.buttons.min.js"></script>
+    <!-- Controller -->
+    <script src="js/controller/accountAdminCtrl.js"></script>
+    <script src="js/controller/accountCtrl.js"></script>
+    <script src="js/controller/accountsettingCtrl.js"></script>
+    <script src="js/controller/appctrl.js"></script>
+    <script src="js/controller/attendantprofilectrl.js"></script>
+    <script src="js/controller/dateTimeGetter.js"></script>
+    <script src="js/controller/parkingCtrl.js"></script>
+    <script src="js/controller/landingCtrl.js"></script>
+    <script src="js/controller/loginCtrl.js"></script>
+    <script src="js/controller/masterTransactionalCtrl.js"></script>
+    <script src="js/controller/ProductReviewsCtrl.js"></script>
+    <script src="js/controller/profilectrl.js"></script>
+    <script src="js/controller/dashboardCtrl.js"></script>
+    <script src="js/controller/subscriptionCtrl.js"></script>
+    <script src="js/controller/supportCtrl.js"></script>
+    <script src="js/controller/userCtrl.js"></script>
+    <script src="js/controller/userRegistrationCtrl.js"></script>
+    <script src="js/controller/validationCtrl.js"></script>
+    <script src="js/controller/venueCtrl.js"></script>
+    <script src="js/controller/monitorCtrl.js"></script>
+    <!-- Directives -->
+    <script src="js/directive/conformPasswordDirective.js"></script>
+    <script src="js/directive/excelexport.js"></script>
+    <script src="js/directive/ngImageViewerDirective.js"></script>
+    <script src="js/directive/spinnerLoader.js"></script>
+    <script src="js/directive/starRating.js"></script>
+    <!-- Services -->
+    <script src="js/service/accountService.js"></script>
+    <script src="js/service/accountsettingService.js"></script>
+    <script src="js/service/dataService.js"></script>
+    <script src="js/service/loginService.js"></script>
+    <script src="js/service/notificationService.js"></script>
+    <script src="js/service/parkingService.js"></script>
+    <script src="js/service/subscriptionService.js"></script>
+    <script src="js/service/supportService.js"></script>
+    <script src="js/service/userService.js"></script>
+    <script src="js/service/venueService.js"></script>
+    <!-- Other -->
+    <script src="js/angular-capitalize.js"></script>
+    <script src="js/angular-timeline.js"></script>
+    <script src="js/markImage.js"></script>
+    <!-- chart -->
+    <script src="js/chart/Chart.js"></script>
+    <script src="js/chart/angular-chart.js"></script>
+    <!-- <script type="text/javascript">
+        $(".showHideForAddCarLoader").hide();
+    </script> -->
+    <script>
+        $(document).ready(function() {
+            $(document).on("wheel", "input[type=number]", function(e) {
+                $(this).blur();
+            });
+        });
+    </script>
+    <!--Service Worker -->
+    <!-- <script src="script.js"></script>
+    <script>
+        // Let's register our serviceworker
+        navigator.serviceWorker.register('sw.js', {
+            // The scope cannot be parent to the script url
+            scope: './'
+        });
+    </script>
+    <script src="logging.js"></script> -->
+    <!--Service Worker -->
+</body>
+
+</html>

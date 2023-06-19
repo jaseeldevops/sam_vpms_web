@@ -1,0 +1,147 @@
+<div class="row wrapper border-bottom white-bg page-heading" ng-init="getAccountUserVenueInit(thisAccountUserLogDetails.id)">
+    <div class="col-lg-9">
+        <h2>Admin Users</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Admin users</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-3 text-right">
+        <button class="btn btn-primary m-t-25" ui-sref="settings.accountUserList">Back</button>
+        <button class="btn red-bg m-t-25" ng-click="openAddUserModal()">Add Admin User</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-3" ng-repeat="adminUsers in filteredUsers | filter : { 'role' : 'accountadmin'} | filter : { 'userName' : searchUserName }  as filteredAccountingUsers  track by $index" ng-hide="adminUsers.id == $user.id">
+            <div class="contact-box center-version" ng-click="listofAccountUserDetails(adminUsers);">
+                <a ui-sref="app.accountUserDetails">
+                    <div class="text-center">
+                        <img ng-if="!adminUsers.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                        <img ng-if="adminUsers.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{adminUsers.profileImage}}">
+                    </div>
+                    <h3 class="m-b-xs text-inline"><strong>{{adminUsers.userName | capitalize}}</strong></h3>
+                    <div>
+                        <p class="text-inline m-b-0" style="max-width: 160px;">
+                            <i class="fa fa fa-envelope"></i> {{adminUsers.email}}
+                        </p>
+                        <p class="m-b-0" ng-if="adminUsers.mobile">
+                            <i class="fa fa-phone"></i> {{adminUsers.mobile}}
+                        </p>
+                    </div>
+                </a>
+                <div class="contact-box-footer">
+                    <div class="m-t-xs btn-group">
+                        <a class="btn btn-sm btn-white" href="tel:{{adminUsers.mobile}}"><i class="fa fa-phone"></i> Call </a>
+                        <a class="btn btn-sm btn-white" href="mailto:{{adminUsers.email}}"><i class="fa fa-envelope"></i> Email</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeIn" id="addUserModal" tabindex="-1" role="dialog" aria-hidden="true" ng-controller="userRegistrationCtrl">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Account User Creation</h3>
+                        <form role="form" name="addAccountUser" autocomplete="off">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" class="form-control" placeholder="Username" name="userName" ng-model="accountAdminData.userName" username-available disallow-spaces required id="userName">
+                                <label class="error" for="userName" ng-show="addAccountUser.userName.$invalid && !addAccountUser.userName.$pristine && !addAccountUser.$error.usernameAvailable">This field is required.</label>
+                                <label class="error" for="userName" ng-show="erroridentified && !addAccountUser.userName.$pristine && !addAccountUser.$error.usernameAvailable ">Username already exists.</label>
+                                <div ng-if="addAccountUser.$pending.usernameAvailable">checking....</div>
+                            </div>
+                            <div ng-hide="true" ng-init="accountAdminData.role='accountadmin'">
+                                <p ng-model="accountAdminData.role"></p>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.requiredLogin || accountAdminData.role != 'driver'">
+                                <label>Password</label>
+                                <input type="password" class="form-control" placeholder="Password" name="password" ng-model="accountAdminData.password" required id="userPassword">
+                            </div>
+                            <div ng-if="accountAdminData.role != 'driver'">
+                                <!-- <div class="form-group" ng-class="{ 'has-error': addAccountUser.email.$invalid && !addAccountUser.email.$pristine }">
+                                    <label>Email</label>
+                                    <input type="email" placeholder="Email" class="form-control" ng-model="accountAdminData.email" name="email" id="userEmail" required>
+                                </div>
+                                <label class="error" for="plantype" ng-show="addAccountUser.email.$invalid && !addAccountUser.email.$pristine">Enter valid email.</label> -->
+                                <div class="form-group" ng-class="{ 'has-error': addAccountUser.email.$invalid && !addAccountUser.email.$pristine }">
+                                    <label>Email</label>
+                                    <input type="email" placeholder="Email" class="form-control" ng-model="accountAdminData.email" name="email" email-available required>
+                                    <label class="error" for="email" ng-show="addAccountUser.email.$invalid && !addAccountUser.email.$pristine && !addAccountUser.$error.emailAvailable">This field is required.</label>
+                                    <label class="error" for="email" ng-show="erroridentified2 && !addAccountUser.$pending.emailAvailable && !addAccountUser.email.$pristine">Email already exists.</label>
+                                    <div ng-if="addAccountUser.$pending.emailAvailable">checking....</div>
+                                    <label class="error" for="plantype" ng-show="addAccountUser.email.$invalid && !addAccountUser.email.$pristine">Enter valid email.</label>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <label>Upload User Documents</label>
+                                        <span class="input-group-btn">
+                                             <button type="button" class="btn btn-primary pull-right" ngf-select ng-model="$parent.images" name="file" ngf-multiple="true" ngf-max-size="20MB" ngf-accept="'image/*'">Browse any images
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-if="$parent.images.length > 0">
+                                    <label>Uploaded Documents</label>
+                                    <div>
+                                        <div class="list">
+                                            <div class="item item-input item-input-padding in in done" ng-repeat="f in $parent.images">
+                                                <a target="_blank" ng-href="{{f.$ngfBlobUrl}}">{{f.name}}<img ngf-src="f" style="display:none"></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mobile</label>
+                                    <input type="number" class="form-control" placeholder="Mobile" name="mobile" ng-model="accountAdminData.mobile" id="userMobile" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Admin Options</label>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="accountAdminData.extraOptions.carTransaction">
+                                        Disable Car Transactions
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="accountAdminData.extraOptions.settings">
+                                        Disable Settings Options
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- <div class="form-group" ng-if="accountAdminData.role != 'driver' && accountAdminData.role !='validator' && accountAdminData.role !='chauffeur'">
+                                <label> Send daily report </label>
+                                <div>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="reportEmail" type="checkbox" ng-model="accountAdminData.sendReport" checked="">
+                                        <label for="reportEmail">
+                                            Send report
+                                        </label>
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" ng-disabled="erroridentified || loadRunner" type="button" id="userSubmitBtn" ng-click="createUserWithCustomizeData($parent.images ,accountAdminData, addAccountUser)">
+                                    <strong ng-if="!loadRunner">Submit</strong><strong ng-if="loadRunner">Loading...</strong>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()">
+                                    <strong>Close</strong>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

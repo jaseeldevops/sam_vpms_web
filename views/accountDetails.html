@@ -1,0 +1,93 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Account Details</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li>
+                <a>Settings</a>
+            </li>
+            <li class="active">
+                <strong>Account Details</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn btn-default m-t-25" ui-sref="settings.accountList">Back</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-offset-3 col-lg-6">
+            <div class="col-lg-12 ibox-content">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <label>Account Name</label>
+                        <h3 class="m-b-xs">{{thisAccount.accountName | capitalize}}</h3>
+                    </div>
+                    <div class="col-lg-6">
+                        <button class="btn btn-default pull-right" data-toggle="modal" data-target="#editAccountName">Edit</button>
+                    </div>
+                </div>
+                <br>
+                <div class="col-lg-12 p-sm border" ng-click="listofAccountSubscription(thisAccount);">
+                    <a class="text-primary" ui-sref="settings.subscription">
+                        <div class="col-lg-6">
+                            <h3>Subscriptions</h3>
+                        </div>
+                        <div class="col-lg-6 text-right p-xxs"><i class="fa fa-chevron-right"></i></div>
+                    </a>
+                </div>
+                <div class="col-lg-12 p-sm border" ng-click="listofAccountUser(thisAccount);">
+                    <a class="text-primary" ui-sref="settings.accountUserList">
+                        <div class="col-lg-6">
+                            <h3>User</h3>
+                        </div>
+                        <div class="col-lg-6 text-right p-xxs"><i class="fa fa-chevron-right"></i></div>
+                    </a>
+                </div>
+                <div class="col-lg-12 p-sm border" ng-click="listofAccountSubscription(thisAccount);">
+                    <a class="text-primary" ui-sref="settings.venue">
+                        <div class="col-lg-6">
+                            <h3>Venues</h3>
+                        </div>
+                        <div class="col-lg-6 text-right p-xxs"><i class="fa fa-chevron-right"></i></div>
+                    </a>
+                </div>
+                <div class="col-lg-12 p-sm border" ng-if="thisAccount.timeZone">
+                    <div class="col-lg-6">
+                        <h3>{{thisAccount.timeZone}}</h3>
+                    </div>
+                    <div class="col-lg-6 text-right p-xxs"><i class="fa fa-clock-o"></i></div>
+                </div>
+                <div class="col-lg-12 text-center m-t-md">
+                    <button class="btn red-bg" ng-click="deleteAccount();">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="editAccountName" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Edit Account Name</h3>
+                        <form role="form" ng-submit="saveEditedAccount1(thisAccount);close()">
+                            <div class="form-group">
+                                <label>Account Name</label>
+                                <input type="text" placeholder="Account Name" class="form-control" ng-model="thisAccount.accountName" required>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit"><strong>Update</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Close</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <span minimaliza-sidebar></span>
+            <h2 class="m-t-15 abusolute"><strong class="m-l-sm">{{$user.accountID.accountName}}</strong></h2>
+        </div>
+        <!-- <button ng-click="cheeeeeeecking()">cheeeeeeecking</button> -->
+        <ul class="nav navbar-top-links navbar-right">
+            <img ng-if="$user.accountID.timeZone == 'Asia/Dubai'" src="img/flags/16/United-Arab-Emirates.png" style="margin-bottom: 3px;">
+            <li class="padding-10" ng-click="openPrintSettingModal()" ng-if="$user.role!='validator' && $user.role!='driver'  && $user.accountID && $user.accountID.id == '5a063bc79f8caede0a58fd39'">
+                <i class="fa fa-print"></i>
+            </li>
+            <li ng-controller="loginCtrl">
+                <a href="" ng-click="logout()">
+                    <i class="fa fa-sign-out"></i> Log out
+                </a>
+            </li>
+            <li ng-if="$user.role=='accountadmin'">
+                <a ng-click="$root.rightSidebar = !$root.rightSidebar">
+                    <i class="fa fa-tasks"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+
+<div class="modal animated fadeInRight" id="printSetting" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6" ng-init="(printerIp == null || printerIp == undefined )? ip ='0.0.0.0' : ip = printerIp">
+                        <h3 class="m-t-none m-b">Hello {{ $user.userName | capitalize}}</h3>
+                        <form role="form" style="margin-top:50px;">
+                            <div class="form-group"><label>IP Address</label>
+                                <input type="text" placeholder="Enter printer ip" class="form-control" ng-model="ip">
+                            </div>
+                            <div class="text-left">
+                                <button class="btn btn-sm btn-primary m-t-n-xs" type="button" ng-click="close()"><strong>Close</strong></button>
+                                <button class="btn btn-sm btn-primary m-t-n-xs" type="button" ng-click="savePrinterIp(ip)"><strong>Save</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-6">
+                        <h4>Printer Setting</h4>
+                        <p>Setting Up Your Printer</p>
+                        <p class="text-center">
+                            <a href=""><i class="fa fa-print big-icon"></i></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

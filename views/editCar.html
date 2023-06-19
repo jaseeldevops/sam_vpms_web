@@ -1,0 +1,372 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Edit Car</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a ui-sref="app.mainDashboard">Home</a>
+            </li>
+            <li class="active">
+                <strong>Edit Car</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn btn-default m-t-25" ui-sref="app.carTransaction">Back</button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight" ng-init="initalizeFunctionforBarreadbleCode()">
+    <div class="row">
+        <div class="col-lg-offset-2 col-lg-8">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3 class="m-t-none m-b">Edit Car</h3>
+                    <div class="contact-box">
+                        <a ui-sref="profile">
+                            <div class="col-sm-4">
+                                <div class="text-center">
+                                    <img alt="image" ng-if="!$user.profileImage" src="img/unknown.png" class="img-circle img-responsive" data-toggle="tooltip" data-placement="top" title="Click And Edit You Picture" ng-click="hideProfile();" width="100px" />
+                                    <img alt="image" ng-if="$user.profileImage" class="img-circle img-responsive" ng-src="{{ipAddress}}/images/{{$user.profileImage}}" type="{{image.file.type}}" on-error-src-user ng-click="hideProfile();" width="100px" />
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <h3><strong>{{$user.userName | capitalize}}</strong></h3>
+                                <p ng-if="$user.role!='accountadmin'" ng-repeat="venue in $user.venues"><i class="fa fa-map-marker"></i>&nbsp;{{venue.venueName | capitalize}}</p>
+                                <div ng-controller="dateTimeGetter">
+                                    <span class="">
+                                            <i class="fa fa-clock-o"></i>
+                                        </span>
+                                    <span class="">&nbsp;{{time | date:'HH:mm:ss '}} -- {{time | date:'dd-MM-yyyy '}}</span>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </a>
+                    </div>
+                    <form role="form" ng-submit="webEditCarFileUpload(images)" ng-controller="loginCtrl">
+                        <div class="form-group">
+                            <label>Ticket Number</label>
+                            <div id="results"></div>
+                            <input type="text" class="form-control" name="parkingID" id="parkingID" ng-class="{ 'has-error' : errorDataFound }" placeholder="Ticket Number" value="EV" ng-keyup="searchParkingIdExistsforEdirMode(editedCarDetails.parkingID)" ng-model="editedCarDetails.parkingID"
+                                onkeydown="upperCaseF(this)">
+                            <!-- <label ng-if="$user.accountID.barCodeAccess">
+                                    <button class="btn fa fa-barcode" 
+                                    onclick="startScan()"></button>
+                                </label> -->
+                        </div>
+                        <span ng-if="errorDataFound" class="help-block errorlogin" style="margin-left: 16px;">Sorry, {{readedBarCode}} is used for another car. Try another.</span>
+                        <div class="form-group">
+                            <label>Plate Number</label>
+                            <input type="text" class="form-control all-caps" name="plateNumber" id="plateNumber" style="margin-bottom: -3px !important;" ng-class="{ 'has-error' : errorDataFound2 }" placeholder="Plate Number" ng-model="editedCarDetails.plateNumber" onkeydown="upperCaseF(this)">
+                            <!-- <label ng-if="$user.accountID.cameraAccess">
+                            <button class="btn fa fa-camera" 
+                                onclick="capturePhotoWithFile();"></button>
+                            </label> -->
+                        </div>
+                        <span ng-if="errorDataFound2" class="help-block errorlogin" style="margin-left: 16px;">Sorry, {{plateNumberThere}} car is already parked. Type full plate number.</span>
+                        <div class="form-group">
+                            <img style="width:159%;height:120px;display:none;" id="smallImage" src="" />
+                            <img style="width:159%;height:120px;display:none;" id="largeImage" src="" />
+                            <canvas id="imgCanvas" style="width:120px;height:200px;display:none;">
+                            </canvas>
+                        </div>
+                        <div ng-controller="accountCtrl">
+                            <div class="form-group" ng-show="$user.role=='manager'">
+                                <label>Select Venue</label>
+                                <select class="form-control" id="multipleVenueIDs" type="text" ng-model="seletedVenueByAAandManager" ng-value="seletedVenueByAAandManager" style="margin-left:0px;margin-right:0px;" ng-options="venue as venue.venueName for venue in accountVenuesandDrivers track by venue.id">
+                                    <option value="" hidden>Select Venue</option>
+                                </select>
+                            </div>
+                            <div class="form-group" ng-show="$user.role=='accountadmin'">
+                                <label>Select Venue</label>
+                                <select class="form-control" id="venueID" ng-model="seletedVenueByAAandManager" style="margin-left:0px;margin-right:0px" ng-options="venue as venue.venueName for venue in accountVenuesandDrivers track by venue.id" ng-value="seletedVenueByAAandManager">
+                                    <option value="" hidden>Select Venue</option>
+                                </select>
+                            </div>
+                            <span ng-if="seletedVenueByAAandManager.users.length == 0 && accountDrivers.length == 0" class="help-block errorlogin">There is no one chauffeur assigned for this venue.</span>
+                            
+                            <div class="form-group full-width">
+                                <label>Parking Zone</label>
+                                <!-- <select class="form-control" id="parkingZone123213" type="text" ng-model="editedCarDetails.parkingZone" style="margin-left:0px;margin-right:0px;" ng-options="venue.name as venue.name for venue in parkingZones" ng-value="parkingZone123213" ng-hide="showBox2">
+                                        <option value="" hidden>Select Zone</option>
+                                </select>
+
+                                <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="parkingZone" id="parkingZone" value="{{editedCarDetails.parkingZone}}" /> -->
+                                <div ng-show="parkingZones.length > 0">
+                                    <ui-select id="parkingZone123213" focus-on="zoneUISelect" ng-model="editedCarDetails.parkingZone" theme="bootstrap" ng-value="parkingZone123213" on-select="showSearchBox2(editedCarDetails.parkingZone);">
+                                        <ui-select-match placeholder="Select Zone">{{$select.selected.name}}
+                                        </ui-select-match>
+                                        <ui-select-choices repeat="venue.name as venue in parkingZones | filter : $select.search">
+                                            <span ng-bind-html="venue.name | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                                <div ng-show="parkingZones.length == 0 || !parkingZones">
+                                    <input type="text" class="form-control form-control1" style="padding: 5px;" name="pk" id="parkingZone123214" ng-model="editedCarDetails.parkingZone">
+                                </div>
+                                <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="parkingZone" id="parkingZone" value="{{editedCarDetails.parkingZone}}" />
+                            </div>
+                            <div class="form-group" ng-if="$user.role != 'chauffeur' && $user.role != 'driver'">
+                                <label>Driver</label>
+                                <select class="form-control" id="accountDriver" name="driver" type="text">
+                                   <option value="">Unknown</option>
+                                   <option ng-repeat="driver in seletedVenueByAAandManager.users track by (driver.id + $index)" value="{{driver}}" ng-selected="selectedDriver2.id == driver.id">{{driver.userName}}</option>
+                               </select>
+                            </div>
+                            <div class="form-group" ng-if="$user.role == 'chauffeur'">
+                                <label>Driver</label>
+                                <select class="form-control" id="accountDriver" name="driver" type="text">
+                                   <option value="">Unknown</option>
+                                   <option ng-repeat="driver in accountDrivers track by (driver.id + $index)" value="{{driver}}" ng-selected="selectedDriver2.id == driver.id" >{{driver.userName}}</option>
+                               </select>
+                            </div>
+
+
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="newBrand" id="newBrand" value="{{editedCarDetails.brand}}" />
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="newColor" id="newColor" value="{{editedCarDetails.color}}" />
+                            <div class="form-group">
+                                <label>Brand</label>
+                                <select class="form-control" ng-model="editedCarDetails.brand" id="carBrand2" placeholder="Select Brand" ng-hide="showBox4" ng-init="searchandSelectModalforCarModels(editedCarDetails.brand)" ng-change="searchandSelectModalforCarModels(editedCarDetails.brand);">
+                                    <option value="" hidden>Select Brand</option>
+                                    <option ng-repeat="brand in brands | unique: 'brand'" value="{{brand.brand}}">{{brand.brand}}</option>
+                                </select>
+
+                                <ui-select ng-model="selectedBrandTemp.brand" theme="bootstrap" id="carBrand2" reset-search-input="false" allow-free-text="true" ng-show="showBox4" on-select="showSearchBox4();">
+                                    <ui-select-match class="ui-select-match" placeholder="Select brand">{{$select.selected.brand}}
+                                        <span ng-if="!$select.selected.brand">Brand</span>
+                                        <!-- <a ng-if="$select.selected" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)"><i class="glyphicon glyphicon-remove"></i></a> -->
+                                    </ui-select-match>
+                                    <ui-select-choices class="ui-select-choices" repeat="brand.brand as brand in brands | unique: 'brand' | filter : $select.search" refresh="refreshResults($select)" refresh-delay="0">
+                                        <img style="width: 38px;" ng-src='img/brands/{{brand.brand}}.png' />
+                                        <span ng-bind-html="brand.brand | highlight: $select.search"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <!-- <span class="input-group-btn p-t-23">
+                                    <button class="btn btn-primary" type="button" ng-click="showSearchBox4()">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span> -->
+                            </div>
+                            <div class="form-group" ng-if="editedCarDetails.venue.settings.carModalName">
+                                <label>Model</label>
+                                <select class="form-control" ng-model="editedCarDetails.modelName" id="carModel" placeholder="Select Brand" ng-hide="showBox4">
+                                    <option value="" hidden>Select Model</option>
+                                    <option ng-repeat="modelName in filteredBrand track by $index" value="{{modelName}}">{{modelName}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <select class="form-control" ng-model="editedCarDetails.color" id="carColor" placeholder="Select Brand" ng-options="color as (color | capitalize) for color in colors" ng-hide="showBox5">
+                                    <option value="" hidden>Select Color</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Customer type</label>
+                                <select class="form-control" id="customerType" name="customerType" type="text" style="margin-left:0px;margin-right:0px;" ng-model="editedCarDetails.customerType">
+                                    <option value="" hidden>Select customer type</option>
+                                    <option ng-repeat="customer in $user.accountID.customerTypes" value="{{customer}}">{{customer}}</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <label class="item item-input item-input-padding" ng-if="$user.accountID.CEDAccess || $user.accountID.markImage" ng-init="choice=false">
+                                            <span class="input-label">Car External Damage (CED)</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-lg-12 padding">
+                                        <label ng-if="$user.accountID.CEDAccess">
+                                        </label>
+                                        <!-- <label ng-if="$user.accountID.markImage">
+                                            <button type="button" class="btn btn-default" ng-click="editButton();resetMarkImageWithTimeDelay();"
+                                                >CED Image</button>
+                                        </label> -->
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="col-lg-12 text-center">
+                                            <img class="img-padding" ng-repeat="img in snapImage track by $index" ng-src="{{img}}" width="150px">
+                                            <img ng-if="editedCarDetails.scratchesSnap.length > 0 && !divClickedByUserData" class="img-padding" ng-repeat="img in editedCarDetails.scratchesSnap track by $index" on-error-src ng-src="{{ipAddress}}/images/{{img}}" style="width:150px;" />
+                                            <img ng-if="editedCarDetails.markImageBlob" class="img-padding" on-error-src style="width:150px;" ng-src="editedCarDetails.markImageBlob" />
+                                            <img class="img-padding" ng-src="{{markedImageSRC}}" ng-if="markedImageSRC" id="markedImageSRC12" width="150px" />
+                                        </div>
+                                        <div class="col-lg-12" ng-click="divClickedByUser()">
+                                            <div id="screenShotImage2">
+                                                <div id="screenShotImage" ng-if="markedImageSRC == '' &&(editedCarDetails.scratchesSnap.length== 0 || divClickedByUserData)" style="width:215px;margin-right:0px;position: relative;right: auto;left: auto;margin: auto;">
+                                                    <div style="position: relative;width: 212px;height: 217px;  left: auto;right: auto;margin: auto;" class="image-decorator" id="image-decorator">
+                                                        <img alt="Image principale" id="example" src="img/example.png" class="image" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <button type="button" ng-if="(markedImageSRC != '' || editedCarDetails.scratchesSnap.length>0) && !divClickedByUserData" class="btn btn-success" ng-click="markShowww();">Edit</button>
+                                        <button type="button" ng-if="divClickedByUserData" class="btn btn-danger" ng-click="markShowww();">Revert</button>
+                                        <button type="button" ng-if="markedImageSRC == '' && divClickedByUserData" class="btn btn-success" ng-click="saveImageForMarkImages();editButton2forSaveMarkImage();">Save</button>
+                                        <!-- <button type="button" ng-if="markedImageSRC != ''" class="btn btn-success" ng-click="markShowww()">Edit</button> -->
+                                        <button type="button" ng-if="markedImageSRC == '' && divClickedByUserData" class="btn btn-default" ng-click="resetMarkedImage();$event.stopPropagation(); $event.preventDefault();">Reset</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Remarks</label>
+                                <textarea class="form-control" rows="2" cols="50" name="remarks" id="remarks" placeholder="Remarks" ng-model="editedCarDetails.remarks" value="{{editedCarDetails.remarks}}"></textarea>
+                            </div>
+                            <div class="col-lg-12 fees_cal_card" ng-if="!editedCarDetails.venue.defaultValues.free && editedCarDetails.venue.settings.initialBillPrint">
+                                <div class="col-lg-12 padding-0">
+                                    <span style="display:none;">  {{ editedCarDetails.fees = editedCarDetails.venue.amount + ( editedCarDetails.venue.VATType == 'inclusive' ? 0 : (editedCarDetails.venue.VAT / 100) * editedCarDetails.venue.amount)}}</span>
+                                    <div class="col-lg-6">
+                                        <div class="form-group text-left">
+                                            <label>Fees</label>
+                                            <p>{{editedCarDetails.venue.amount}}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group text-left">
+                                            <label>{{editedCarDetails.venue.VAT}}% VAT applied</label>
+                                            <input class="form-control" id="parkingFees" ng-model="editedCarDetails.fees" value="{{editedCarDetails.fees}}" disabled style="border:none;background:none;" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 padding-0">
+                                    <div class="col-lg-6">
+                                        <div class="form-group text-left">
+                                            <label>Amount Received</label>
+                                            <div>
+                                                <input icheck type="checkbox" id="amountPaidCheckbox" ng-model="editedCarDetails.amountPaid" ng-disabled="editedCarDetails.amountPaid" value="{{editedCarDetails.amountPaid}}"> Yes
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group text-left">
+                                            <label>Print</label>
+                                            <div>
+                                                <button class="btn btn-success" ng-click="printButtonClickedforPrintforBillOnly(editedCarDetails)">
+                                                    Print
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <h3 class="text-center"><strong>Restaurant validation</strong></h3>
+                            <div class="p-sm border bg-muted">
+                                <div class="form-group">
+                                    <label>Free parking?</label>
+                                    <div class="col pull-right">
+                                        <input type="checkbox" class="js-switch" ui-switch="{color:'#1AB394'}" ng-model="editedCarDetails.free" />
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="form-group p-t-sm p-b-sm">
+                                    <label>Upload User Documents</label>
+                                    <button type="button" class="btn btn-primary pull-right" ngf-select ng-model="editedCarDetails.images" name="file" ngf-multiple="true" ngf-max-size="20MB" ngf-resize="{width: 100, height: 100}">Browse documents
+                                    </button>
+                                </div>
+                                <div class="form-group" ng-if="editedCarDetails.images || editedCarDetails.documents">
+                                    <label>Uploaded Documents</label>
+                                    <div class="col">
+                                        <div class="list" ng-if="editedCarDetails.documents.length > 0">
+                                            <div class="item item-input item-input-padding in in done" ng-repeat="f in editedCarDetails.documents">{{f}}</div>
+                                        </div>
+                                        <div class="list" ng-if="editedCarDetails.images">
+                                            <div class="item item-input item-input-padding in in done" ng-repeat="f in editedCarDetails.images">{{f.name}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <input type="text" class="form-control" ng-model="editedCarDetails.description" placeholder="Description" name="Description">
+                                </div>
+                            </div> -->
+                            <br>
+
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="employeeID" id="employeeID" value="{{$user.id}}" />
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="loginAs" id="loginAs" value="{{$user.userName}}" />
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="loginUser" id="loginUser" value="{{$user}}" />
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="employeeName" id="employeeName" value="{{$user.fullName}}" />
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="employeeRole" id="employeeRole" value="{{$user.role}}" />
+                            <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="accountID" id="accountID" value="{{$user.accountID.id}}" />
+                            <div ng-repeat="venue in $user.venues">
+                                <input type="hidden" class="form-control form-control1" style="padding: 5px;" name="venueID" id="venueID" value="{{venue.id}}" />
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <!-- <button class="btn btn-sm btn-primary" id="edirCarSubmitBtn" type="submit"><strong>Update</strong></button> -->
+
+                            <button class="btn btn-primary ladda-button" ladda="loadRunner" data-style="slide-up" type="submit" id="edirCarSubmitBtn"><strong>Update</strong></button>
+                            <button type="button" class="btn btn-muted m-r-5" ui-sref="app.carTransaction"><strong>Back</strong></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeIn" id="carBrandColorModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Car Model and Color Selection</h3>
+                        <div ng-if="modalType == 'editBrand'">
+                            <span ng-if="!editedCarDetails.brand">
+                                <h5>Select Brand</h5>
+                                <img ng-src="img/brands/other.png" style="height: auto !important;width: 60px;padding: 5px;background: none;border: 1px solid;margin: 5px;" ng-click="selectedBrandedLogo('other', 'edit')"/>
+                                <img ng-repeat="brand in brands | unique: 'brand' | filter : searchBrand  as searchLengthBrand track by $index" ng-src="img/brands/{{brand.brand}}.png" style="height: auto !important;width: 60px;padding: 5px;background: none;border: 1px solid;margin: 5px;" ng-click="selectedBrandedLogo(brand, 'edit')"/>
+                            </span>
+                            <div class="col-lg-12 text-left">
+                                <div ng-if="editedCarDetails.brand">
+                                    <div class="col-lg-4">
+                                        <div class="close-btn-modal" ng-click="removeSelectedBrand('edit');">x {{editedCarDetails.brand}}</div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="close-btn-modal" ng-if="editedCarDetails && editedCarDetails.modelName" ng-click="removeSelectedBrand('editModelName');">x {{editedCarDetails.modelName}}</div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="close-btn-modal" ng-if="editedCarDetails && editedCarDetails.color" ng-click="removeSelectedBrand('editColor');">x {{editedCarDetails.color}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="editedCarDetails && editedCarDetails.brand == 'other' && showColor == false">
+                                <div class="row">
+                                    <div class="item item-input item-icon-right" style="margin-right:16px;border: none;">
+                                        <input type="text" style="margin-bottom: -3px !important;" placeholder="Type Model Name" ng-model="editedCarDetails.modelName">
+                                    </div>
+                                </div>
+                                <div class="item" style="border: none;">
+                                    <button ng-click="selectedBrandedLogoFinal('other', 'otherColor-edit');" class="button button-full buttonface">Save</button>
+                                </div>
+                            </div>
+                            <div class="col-lg-12" ng-if="editedCarDetails && editedCarDetails.brand!='other' && showColor == false">
+                                <h5>Select Model</h5>
+                                <div class="user-friends col-lg-3 p-xs" ng-repeat="brand in filteredBrand | filter : searchBrand  track by $index" ng-click="selectedBrandedLogoFinal(brand, 'edit');" style="border: 1px solid;margin: 5px;">
+                                    <a href=""><img alt="image" class="img-circle" ng-src='img/brands/{{brand.brand}}.png'></a>
+                                    <p>{{brand.brand | capitalize}}</p>
+                                    <small>{{brand.modelName}}</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <span ng-if="showColor">
+                                    <h5>Select Color</h5>
+                                    <img ng-repeat="cols in colors track by $index" ng-src="img/colors/{{cols}}.png" style="height: auto !important;width: 60px;padding: 5px;background: none;border: 1px solid;margin: 5px;" ng-click="selectedBrandedLogoFinalColor(cols, 'edit');close();"/>
+                                </span>
+                            </div>
+                            <div ng-if="searchLengthBrand.length == 0" class="widthheigh">
+                                <p class="nocarfound">No Brand Found</p>
+                            </div>
+                            <div class="text-right">
+                                <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // $('input:text:first').focus();
+    $('#parkingID').focus();
+</script>

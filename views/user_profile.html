@@ -1,0 +1,135 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-9">
+        <h2>User Profile</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li class="active">
+                <strong>Profile</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row pull-center">
+        <div class="col-lg-offset-1 col-lg-10">
+            <div class="contact-box border">
+                <div class="col-lg-5">
+                    <div class="widget-head-color-box navy-bg p-lg text-center">
+                        <div class="m-b-md">
+                            <h2 class="font-bold no-margins">
+                                {{$user.userName | capitalize}}
+                            </h2>
+                            <small>{{$user.role | capitalize}}</small>
+                        </div>
+                        <div ng-if="!image || image.$error">
+                            <img ng-if="!$user.profileImage" src="img/unknown.png" alt="image" class="img-circle circle-border m-b-md" data-toggle="tooltip" data-placement="top" title="Click And Edit You Picture" width="150px" height="150px" />
+                            <img ng-if="$user.profileImage" alt="image" class="img-circle circle-border m-b-md" ng-src="{{ipAddress}}/images/{{$user.profileImage}}" type="{{image.file.type}}" on-error-src-user width="150px" height="150px" />
+                        </div>
+                        <img ng-if="image && !image.$error" ngf-src="image" ngf-background="image" class="img-circle circle-border m-b-md" ngf-no-object-url="true or false" width="150px" height="150px">
+                    </div>
+                    <div class="widget-text-box">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <button class="btn btn-default full-width" ngf-select ng-model="image" name="file" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="20MB" ngf-resize="{width: 128px, height: 128px}"><small>Browse image</small></button>
+                            </div>
+                            <hr>
+                            <div class="col-lg-12 padding-0">
+                                <div class="col-lg-6">
+                                    <button class="btn btn-default full-width" ng-click="UploadProFile(image, $user.id);" ng-disabled="!image ||image.$error"><small>Upload</small></button>
+                                </div>
+                                <div class="col-lg-6">
+                                    <button class="btn btn-default full-width" ng-click="cancelUpload();image =''"><small>Cancel</small></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <button ng-if="$user.role =='admin' || $user.role =='accountadmin'" class="btn btn-default pull-right" ng-click="openUserProfileEditModal('editUserInfo')">Edit</button>
+                    <h3><strong>{{$user.userName | capitalize}}</strong></h3>
+                    <!-- <p ng-repeat="venue in $user.venues" ng-if="$user.role != 'accountadmin'"><i class="fa fa-map-marker"></i> {{venue.venueName | capitalize}}</p> -->
+                    <strong>Contact details</strong>
+                    <ul class="list-group clear-list">
+                        <li class="list-group-item fist-item">
+                            <span class="pull-right"> {{$user.userName | capitalize}} </span> User Name:
+                        </li>
+                        <li class="list-group-item">
+                            <span class="pull-right" href="tel:{{$user.mobile}}">{{$user.mobile}}</span> Mobile:
+                        </li>
+                        <li class="list-group-item">
+                            <span class="pull-right" href="mailto:{{$user.email}}">{{$user.email}}</span> Email:
+                        </li>
+                        <li ng-if="$user.role != 'accountadmin'" class="list-group-item" ng-repeat="venue in $user.venues">
+                            <span class="pull-right"> {{venue.venueName | capitalize}} </span> Venue:
+                        </li>
+                        <!-- <li class="list-group-item">
+                            <span class="pull-right"> {{$user.accountID.accountName | capitalize}}</span> Hotel:
+                        </li> -->
+                    </ul>
+                    <div class="pull-right" ng-if="$user.role =='accountadmin' || $user.role =='manager'">
+                        <button class="btn btn-success m-r-5" ng-click="seletUserToVenue($user.id,$user.role);" ui-sref="app.assign_venue" ng-if="$user.role!='accountadmin'">Change Venue</button>
+                        <button class="btn btn-success" ng-click="openUserProfileEditModal('changePassword')">Change Password</button>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal animated fadeInRight" id="userProfileEdit" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12" ng-if="formType=='editUserInfo'">
+                        <h3 class="m-t-none m-b">Edit User Informations</h3>
+                        <form role="form" name="profileEditForm">
+                            <!-- <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" placeholder="Full Name" class="form-control" ng-model="$user.fullName" required>
+                            </div> -->
+                            <div class="form-group">
+                                <label>User Name</label>
+                                <input type="text" placeholder="User Name" class="form-control" ng-model="$user.userName" id="profileUserName" ng-disabled="true" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mobile</label>
+                                <input type="text" placeholder="Mobile" class="form-control" ng-model="$user.mobile" required id="profileMobile">
+                            </div>
+                            <div class="form-group" ng-class="{ 'has-error': profileEditForm.email.$invalid && !profileEditForm.email.$pristine }">
+                                <label>Email</label>
+                                <input type="email" placeholder="Email" name="email" class="form-control" ng-model="$user.email" id="profileEmail" required>
+                            </div>
+                            <label class="error" for="plantype" ng-show="profileEditForm.email.$invalid && !profileEditForm.email.$pristine">Enter valide email.</label>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="button" ng-click="saveEditedProfileUser()" id="profileUpdateBtn"><strong>Update</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Close</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-lg-12" ng-if="formType=='changePassword'" ng-controller="loginCtrl">
+                        <h3 class="m-t-none m-b">Change Password</h3>
+                        <form name="changepasswordform" role="form" ng-submit="changePass(user)">
+                            <div class="form-group" ng-class="{ 'has-error' : changepasswordform.email.$invalid && !changepasswordform.email.$pristine }">
+                                <label>Password</label>
+                                <input type="password" placeholder="Password" class="form-control" ng-model="user.newPass" required>
+                            </div>
+                            <span ng-show="changepasswordform.password.$invalid && !changepasswordform.password.$pristine" class="help-block">Please enter password</span>
+                            <div class="form-group" ng-class="{ 'has-error' : changepasswordform.email.$invalid && !changepasswordform.email.$pristine }">
+                                <label>Confirm Password</label>
+                                <input type="password" class="form-control" placeholder="Confirm Password" ng-model="user.newPass1" required>
+                            </div>
+                            <span ng-show="changepasswordform.password.$invalid && !changepasswordform.password.$pristine" class="help-block">Please enter confirm  password</span>
+                            <div>
+                                <button class="btn btn-sm btn-primary pull-right" type="submit"><strong>Update</strong></button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()"><strong>Close</strong></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

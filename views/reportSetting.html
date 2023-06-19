@@ -1,0 +1,40 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Report Setting</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a ui-sref="app.mainDashboard">Home</a>
+            </li>
+            <li class="active">
+                <strong>Report Setting</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2 text-right">
+        <button class="btn btn-sm btn-primary m-t-25" type="button" ng-click="reportFieldSetting()"><strong>Save</strong></button>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <h3>Report Setting</h3>
+                    <form role="form" class="row">
+                        <div class="col-lg-3 p-xxs" ng-repeat="setting in reportSettings">
+                            <div class="form-group p-xs border">
+                                <div style="display:flex">
+                                    <label class="m-xs"> <input icheck type="checkbox" ng-model="setting.selected" ng-change="CheckUncheckAll(setting.selected, setting.name)"> </label>
+                                    <input type="text" class="form-control" placeholder="{{setting.name}}" ng-model="setting.displayName">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center" ng-if="reportSettings.length==0">
+                            <p>Loading......</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

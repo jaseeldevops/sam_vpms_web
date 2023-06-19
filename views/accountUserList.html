@@ -1,0 +1,546 @@
+<div class="row wrapper border-bottom white-bg page-heading" ng-init="getAccountUserVenueInit(thisAccountUserLogDetails.id)">
+    <div class="col-lg-9">
+        <h2>Account User List</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a>Home</a>
+            </li>
+            <li>
+                <a>Settings</a>
+            </li>
+            <li class="active">
+                <strong>Account user list</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-3 text-right">
+        <button class="btn btn-default m-t-25" ng-if="$user.role=='admin'" ui-sref="settings.accountDetails">Back</button>
+        <button class="btn btn-primary m-t-25" ui-sref="app.admins" ng-if="$user.role!='admin'">Admin User List</button>
+        <button class="btn red-bg m-t-25" ng-click="openAddUserModal()">Add User</button>
+    </div>
+</div>
+<div class="ibox" ng-if="$user.role!='admin'">
+    <div class="m-15 ibox-content border">
+        <div class="row">
+            <div class="col-lg-12 padding-0">
+                <div class="col-lg-4">
+                    <label>Filter by location : </label>
+                    <div ng-if="venue.length > 0">
+                        <ui-select ng-model="selectedOptionsforanAnalysis.venue" theme="bootstrap" ng-change="filterVenueWiseUserDetails()" reset-search-input="false">
+                            <ui-select-match placeholder="All Venue">{{$select.selected.venueName}}
+                                <span ng-if="!$select.selected.venueName">All Venue</span>
+                                <a ng-if="$select.selected.venueName" class="btn btn-xs close-btn-pos" ng-click="clear($event, $select);stopEventFunction($event)"><i class="glyphicon glyphicon-remove"></i></a>
+                            </ui-select-match>
+                            <ui-select-choices repeat="venueDetails in venue | custom : $select.search" refresh="refreshResults($select)" refresh-delay="0">
+                                <div ng-bind-html="venueDetails.venueName | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="col-lg-offset-4 col-lg-4">
+                    <label>Search by Username : </label>
+                    <div class="input-group pull-right">
+                        <input type="text" placeholder="Search Username" class="input form-control input-sm" ng-model="searchUserName" ng-keyup="pressedKeyByUsername1(searchUserName)">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-primary">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Admin -->
+<div class="wrapper p-t-0 wrapper-content animated fadeInRight" ng-if="$user.role=='admin'">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Account Admin</h5>
+                    </div>
+                    <div class="ibox-content border full-height-scroll" full-scroll>
+                        <div>
+                            <div class="feed-activity-list" ng-show="userLog.role=='accountadmin'" ng-repeat="userLog in thisAccount.users | filter : { 'role' : 'accountadmin'} track by $index">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <p class="m-b-0">{{userLog.mobile}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!thisAccount.users || thisAccount.users.length == 0">
+                                <p class="text-center text-muted">No Account Admin Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Accounting User</h5>
+                    </div>
+                    <div class="ibox-content border full-height-scroll" full-scroll>
+                        <div>
+                            <div class="feed-activity-list" ng-show="userLog.role=='accountinguser'" ng-repeat="userLog in thisAccount.users" ui-sref="app.accountUserDetails">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <p class="m-b-0">{{userLog.mobile}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!thisAccount.users || thisAccount.users.length == 0">
+                                <p class="text-center text-muted">No Managers Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Supervisors / Cashiers</h5>
+                    </div>
+                    <div class="ibox-content border full-height-scroll" full-scroll>
+                        <div>
+                            <div class="feed-activity-list" ng-show="userLog.role=='chauffeur'" ng-repeat="userLog in thisAccount.users">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <p class="m-b-0">{{userLog.mobile}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!thisAccount.users || thisAccount.users.length == 0">
+                                <p class="text-center text-muted">No Supervisors Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Chauffeurs</h5>
+                    </div>
+                    <div class="ibox-content border full-height-scroll" full-scroll>
+                        <div>
+                            <div class="feed-activity-list" ng-show="userLog.role=='driver'" ng-repeat="userLog in thisAccount.users">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <p class="m-b-0">{{userLog.mobile}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!thisAccount.users || thisAccount.users.length == 0">
+                                <p class="text-center text-muted">No Chauffeurs Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-lg-3">
+                    <div class="contact-box center-version">
+                        <a href="profile.html">
+                            <img alt="image" class="img-circle" src="img/a2.jpg">
+                            <h3 class="m-b-xs"><strong>{{thisAccountUserLogDetails.fullName | capitalize}}</strong></h3>
+                            <div class="font-bold">{{thisAccountUserLogDetails.role | capitalize}}</div>
+                            <address class="m-t-md">
+                                <strong>Contact Details</strong><br>
+                                Email: {{thisAccountUserLogDetails.email}}<br>
+                                <abbr title="Phone">Phone:</abbr> {{thisAccountUserLogDetails.mobile}}<br>
+                                <span><i class="fa fa-map-marker"></i>{{venue.venueName | capitalize}}</span>
+                            </address>
+                        </a>
+                    </div>
+                </div> -->
+        </div>
+    </div>
+</div>
+<!-- Account Admin -->
+<div class="wrapper p-t-0 wrapper-content  animated fadeInRight" ng-if="$user.role!='admin'">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- <div class="col-lg-4 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Managers</h5>
+                    </div>
+                    <div class="ibox-content border full-height-scroll" full-scroll>
+                        <div>
+                            <div class="feed-activity-list" ng-repeat="userLog in filteredUsers | filter : { role : 'manager'} | filter : { 'userName' : searchUserName }   as filteredManagers  track by $index">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body">
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <p class="m-b-0"><i class="fa fa-user"></i> Manager</p>
+                                        <div>
+                                            <span class="m-b-0"><i class="fa fa-map-marker"></i> {{ userLog.venues | listVenues}} </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!filteredManagers || filteredManagers.length == 0">
+                                <p class="text-center text-muted">No Managers Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Accounting User ({{filteredAccountingUsers.length}})</h5>
+                    </div>
+                    <div class="ibox-content border" ng-class="{custscroll:filteredUsers.length >= 5}">
+                        <div>
+                            <div class="feed-activity-list" ng-repeat="userLog in filteredUsers | filter : { 'role' : 'accountinguser'} | filter : { 'userName' : searchUserName }  as filteredAccountingUsers  track by $index">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body text-inline">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <!-- <p class="m-b-0">{{userLog.mobile}}</p> -->
+                                        <p class="m-b-0"><i class="fa fa-user"></i> {{userLog.role | capitalize}}</p>
+                                        <div>
+                                            <span class="m-b-0"><i class="fa fa-map-marker"></i> {{ userLog.venues | listVenues}} </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!filteredAccountingUsers || filteredAccountingUsers.length == 0">
+                                <p class="text-center text-muted">No Accounting User Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Validator ({{filteredValidator.length}})</h5>
+                    </div>
+                    <div class="ibox-content border" ng-class="{custscroll:filteredUsers.length >= 5}">
+                        <div>
+                            <div class="feed-activity-list" ng-repeat="userLog in filteredUsers | filter : { 'role' : 'validator'} | filter : { 'userName' : searchUserName }  as filteredValidator  track by $index">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body text-inline">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <!-- <p class="m-b-0">{{userLog.mobile}}</p> -->
+                                        <p class="m-b-0"><i class="fa fa-user"></i> {{userLog.role | capitalize}}</p>
+                                        <div>
+                                            <span class="m-b-0"><i class="fa fa-map-marker"></i> {{ userLog.venues | listVenues}} </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!filteredValidator || filteredValidator.length == 0">
+                                <p class="text-center text-muted">No Validator Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Supervisors / Cashiers ({{filteredChaffeurs.length}})</h5>
+                    </div>
+                    <div class="ibox-content border" ng-class="{custscroll:filteredUsers.length >= 5}">
+                        <div>
+                            <div class="feed-activity-list" ng-repeat="userLog in filteredUsers | filter : { 'role' : 'chauffeur'} | filter : { 'userName' : searchUserName }  as filteredChaffeurs track by $index">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body text-inline">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <!-- <p class="m-b-0">{{userLog.mobile}}</p> -->
+                                        <p class="m-b-0"><i class="fa fa-user"></i> Supervisor/Cashier</p>
+                                        <div>
+                                            <span class="m-b-0"><i class="fa fa-map-marker"></i> {{ userLog.venues | listVenues}} </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!filteredChaffeurs || filteredChaffeurs.length == 0">
+                                <p class="text-center text-muted">No Supervisors / Cashier Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 p-xxs">
+                <div class="ibox float-e-margins slimScrollDiv">
+                    <div class="ibox-title border">
+                        <h5>Drivers ({{filteredDrivers.length}})</h5>
+                    </div>
+                    <div class="ibox-content border" ng-class="{custscroll:filteredUsers.length >= 5}">
+                        <div>
+                            <div class="feed-activity-list" ng-repeat="userLog in filteredUsers | filter : { 'role' : 'driver'} | filter : { 'userName' : searchUserName }  as filteredDrivers  track by $index">
+                                <div class="feed-element p-sm cursor" ng-click="listofAccountUserDetails(userLog);" ui-sref="app.accountUserDetails">
+                                    <a class="pull-left">
+                                        <img ng-if="!userLog.profileImage" alt="image" class="img-circle" src="img/unknown.png">
+                                        <img ng-if="userLog.profileImage" alt="image" class="img-circle" ng-src="{{ipAddress}}/images/{{userLog.profileImage}}">
+                                    </a>
+                                    <div class="media-body text-inline">
+                                        <!-- <small class="pull-right">5m ago</small> -->
+                                        <strong>{{userLog.userName | capitalize}}</strong>
+                                        <!-- <p class="m-b-0">{{userLog.mobile}}</p> -->
+                                        <p class="m-b-0"><i class="fa fa-user"></i> Driver</p>
+                                        <div>
+                                            <span class="m-b-0"><i class="fa fa-map-marker"></i> {{ userLog.venues | listVenues}} </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="!filteredDrivers || filteredDrivers.length == 0">
+                                <p class="text-center text-muted">No Driver Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-lg-3">
+                    <div class="contact-box center-version">
+                        <a href="profile.html">
+                            <img alt="image" class="img-circle" src="img/a2.jpg">
+                            <h3 class="m-b-xs"><strong>{{thisAccountUserLogDetails.fullName | capitalize}}</strong></h3>
+                            <div class="font-bold">{{thisAccountUserLogDetails.role | capitalize}}</div>
+                            <address class="m-t-md">
+                                <strong>Contact Details</strong><br>
+                                Email: {{thisAccountUserLogDetails.email}}<br>
+                                <abbr title="Phone">Phone:</abbr> {{thisAccountUserLogDetails.mobile}}<br>
+                                <span><i class="fa fa-map-marker"></i>{{venue.venueName | capitalize}}</span>
+                            </address>
+                        </a>
+                    </div>
+                </div> -->
+        </div>
+    </div>
+</div>
+
+<div class="modal animated fadeIn" id="addUserModal" tabindex="-1" role="dialog" aria-hidden="true" ng-controller="userRegistrationCtrl">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h3 class="m-t-none m-b">Account User Creation</h3>
+                        <form role="form" name="addAccountUser" autocomplete="off">
+                            <!-- <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" class="form-control" placeholder="Full Name" name="fullname" highlight-color="balanced" ng-model="accountAdminData.fullName" required>
+                            </div> -->
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" class="form-control" placeholder="Username" name="userName" ng-model="accountAdminData.userName" username-available disallow-spaces required id="userName">
+                                <label class="error" for="userName" ng-show="addAccountUser.userName.$invalid && !addAccountUser.userName.$pristine && !addAccountUser.$error.usernameAvailable">This field is required.</label>
+                                <label class="error" for="userName" ng-show="erroridentified && !addAccountUser.userName.$pristine && !addAccountUser.$error.usernameAvailable">Username already exists.</label>
+                                <div ng-if="addAccountUser.$pending.usernameAvailable">checking....</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Select Role</label>
+                                <select class="form-control" name="role" ng-model="accountAdminData.role" required id="role">
+                                    <option value="" hidden>Select Role</option>
+                                    <!-- <option ng-show="$user.role=='admin'" value="accountadmin">Account Admin</option> -->
+                                    <!-- <option ng-show="$user.role=='admin' || $user.role=='accountadmin'" value="manager">Manager</option> -->
+                                    <option ng-show="$user.role=='admin' || $user.role=='accountadmin'" value="accountadmin">Account Admin</option>
+                                    <option ng-show="$user.role=='admin' || $user.role=='accountadmin'" value="accountinguser">Accounting User</option>
+                                    <option ng-show=" $user.role=='admin' || $user.role=='accountadmin' || $user.role=='manager'" value="chauffeur">Supervisor / Cashier</option>
+                                    <option ng-show=" $user.role=='admin' || $user.role=='accountadmin' || $user.role=='manager'" value="driver">Driver</option>
+                                    <option ng-show=" $user.role=='admin' || $user.role=='accountadmin' || $user.role=='manager'" value="validator">Validator</option>
+                                </select>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.role =='validator'">
+                                <label>Select Role Type</label>
+                                <select class="form-control" name="role" ng-model="accountAdminData.validationType" required id="role">
+                                    <option value="" hidden>Select Type</option>
+                                    <option value="type1">Type 1</option>
+                                    <option value="type2">Type 2</option>
+                                    <option value="type3">Type 3</option>
+                                    <option value="type4">Type 4</option>
+                                    <option value="type5">Type 5</option>
+                                    <option value="type6">Type 6</option>
+                                    <option value="type7">Type 7</option>
+                                    <option value="type8">Type 8</option>
+                                    <option value="type9">Type 9</option>
+                                    <option value="type10">Type 10</option>
+                                </select>
+                            </div>
+                            <p class="font-bold  alert alert-success m-b-sm" ng-if="accountAdminData.validationType && accountAdminData.role == 'validator'">
+                                <span ng-if="accountAdminData.validationType != 'type1'"><b> Base parking hours </b> <span ng-if="accountAdminData.validationType != 'type1' && accountAdminData.validationType != 'type2'"><b>+ proceeding {{accountAdminData.validationType.substring(4) - 2 }} hour(s)</b> </span>                                <b>free</b></span>
+
+                                <span ng-if="accountAdminData.validationType == 'type1'"><b>Parking </b> <b>free</b><span></span>
+                            </p>
+                            <div class="form-group" ng-if="accountAdminData.role != 'manager' && accountAdminData.role != 'accountadmin'">
+                                <label>Select venue </label>
+                                <select class="form-control" ng-model="accountAdminData.defaultVenue" placeholder="" ng-options="venueDetails.id as venueDetails.venueName for venueDetails in venue" id="venue">
+                                    <option value="" hidden>Select Venue</option>
+                                </select>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.role == 'driver'">
+                                <label> Driver required login ? </label>
+                                <div>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="driverLogin" type="checkbox" ng-model="accountAdminData.requiredLogin" checked="">
+                                        <label for="driverLogin">
+                                            Driver login
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.requiredLogin || accountAdminData.role != 'driver'">
+                                <label>Password</label>
+                                <input type="password" class="form-control" placeholder="Password" name="password" ng-model="accountAdminData.password" required id="userPassword">
+                            </div>
+                            <div ng-if="accountAdminData.role != 'driver'">
+                                <div class="form-group" ng-class="{ 'has-error': addAccountUser.email.$invalid && !addAccountUser.email.$pristine }">
+                                    <label>Email</label>
+                                    <input type="email" placeholder="Email" class="form-control" ng-model="accountAdminData.email" name="email" email-available required>
+                                    <label class="error" for="email" ng-show="addAccountUser.email.$invalid && !addAccountUser.email.$pristine && !addAccountUser.$error.emailAvailable">This field is required.</label>
+                                    <label class="error" for="email" ng-show="erroridentified2 && !addAccountUser.$pending.emailAvailable && !addAccountUser.email.$pristine">Email already exists.</label>
+                                    <div ng-if="addAccountUser.$pending.emailAvailable">checking....</div>
+                                    <label class="error" for="plantype" ng-show="addAccountUser.email.$invalid && !addAccountUser.email.$pristine">Enter valid email.</label>
+                                </div>
+                                <div class="form-group" ng-if="accountAdminData.role == 'driver'">
+                                    <label>License Number</label>
+                                    <input type="text" class="form-control" placeholder="License Number" name="licensenumber" ng-model="accountAdminData.licenseNumber" id="userLicense" required>
+                                </div>
+                                <div class="form-group" ng-if="accountAdminData.role == 'driver'">
+                                    <label>Joining Date</label>
+                                    <input placeholder="Joining date" name="date" class="form-control" type="date" ng-model="accountAdminData.joiningDate" id="joinDate">
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <label>Upload User Documents</label>
+                                        <span class="input-group-btn">
+                                             <button type="button" class="btn btn-primary pull-right" ngf-select ng-model="$parent.images" name="file" ngf-multiple="true" ngf-max-size="20MB" ngf-accept="'image/*'">Browse any images
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group" ng-if="$parent.images.length > 0">
+                                    <label>Uploaded Documents</label>
+                                    <div>
+                                        <div class="list">
+                                            <div class="item item-input item-input-padding in in done" ng-repeat="f in $parent.images">
+                                                <a target="_blank" ng-href="{{f.$ngfBlobUrl}}">{{f.name}}<img ngf-src="f" style="display:none"></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mobile</label>
+                                    <input type="number" class="form-control" placeholder="Mobile" name="mobile" ng-model="accountAdminData.mobile" id="userMobile" required>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.role =='validator'">
+                                <label>Outlet Name</label>
+                                <input type="text" class="form-control" placeholder="Outlet Name" name="outlet" ng-model="accountAdminData.outletName" id="outlet" required>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.role != 'driver' && accountAdminData.role !='accountadmin' && accountAdminData.role !='chauffeur'">
+                                <label> Send daily report </label>
+                                <div>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="reportEmail" type="checkbox" ng-model="accountAdminData.sendReport" checked="">
+                                        <label for="reportEmail">
+                                            Send report
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Change the password </label>
+                                <div>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="reportEmail1" type="checkbox" ng-model="accountAdminData.extraOptions.changePassword" checked="">
+                                        <label for="reportEmail1">
+                                            Allow to change his/her password
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.role == 'chauffeur'">
+                                <label> Enable revalidate option </label>
+                                <div>
+                                    <div class="checkbox checkbox-info checkbox-circle">
+                                        <input id="revalidateOption" type="checkbox" ng-model="accountAdminData.revalidate" checked="">
+                                        <label for="revalidateOption">
+                                            Revalidate
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="accountAdminData.role =='accountadmin'">
+                                <label>Admin Options</label>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="accountAdminData.extraOptions.carTransaction">
+                                        Disable Car Transactions
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="m-sm"> 
+                                        <input icheck type="checkbox" ng-model="accountAdminData.extraOptions.settings">
+                                        Disable Settings Options
+                                    </label> 
+                                </div>
+                            </div>
+                            <div>
+                                <button ng-if="accountAdminData.role == 'accountadmin' || accountAdminData.role == 'accountinguser' || accountAdminData.role == 'validator'" class="btn btn-sm btn-primary pull-right" ng-disabled="erroridentified || erroridentified2 || loadRunner" type="button"
+                                    id="userSubmitBtn" ng-click="createUserWithCustomizeData($parent.images ,accountAdminData, addAccountUser)">
+                                    <strong ng-if="!loadRunner">Submit</strong><strong ng-if="loadRunner">Saving.....</strong>
+                                </button>
+                                <button ng-if="accountAdminData.role == 'driver' || accountAdminData.role == 'chauffeur'" class="btn btn-sm btn-primary pull-right" ng-disabled="erroridentified || erroridentified2|| loadRunner" type="button" id="userSubmitBtn" ng-click="postUserViaAccount($parent.images ,accountAdminData, addAccountUser);">
+                                    <strong ng-if="!loadRunner">Submit</strong><strong ng-if="loadRunner">Saving.....</strong>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-muted pull-right m-r-5" ng-click="close()">
+                                    <strong>Close</strong>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

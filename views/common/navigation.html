@@ -1,0 +1,199 @@
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul side-navigation class="nav metismenu" id="side-menu">
+            <img ng-if="$user.accountID && ($user.accountID.id != '5a063bc79f8caede0a58fd39' &&  $user.accountID.id != '5b290da170c15aef1177c651')" class="p-xs pattern-bg nav-label" alt="image" width="220px" src="img/Elogo.png" />
+            <img ng-if="$user.accountID && $user.accountID.id==='5a063bc79f8caede0a58fd39'" class="pattern-bg nav-label" alt="image" width="220px" src="img/oscar-logo/logo.png" />
+            <img ng-if="$user.accountID && $user.accountID.id==='5b290da170c15aef1177c651'" class="pattern-bg nav-label" alt="image" width="220px" src="img/TVClogo.jpg" />
+            <li class="nav-header">
+                <div class="profile-element" uib-dropdown ng-controller="userCtrl">
+                    <!-- <img alt="image" class="img-circle" src="img/profile_small.jpg" /> -->
+                    <img alt="image" ng-if="!$user.profileImage" src="img/unknown.png" class="img-circle width-30-p" data-toggle="tooltip" data-placement="top" title="Click And Edit You Picture" ng-click="hideProfile();" height="51px" />
+                    <img alt="image" ng-if="$user.profileImage" class="img-circle width-30-p" ng-src="{{ipAddress}}/images/{{$user.profileImage}}" type="{{image.file.type}}" on-error-src-user ng-click="hideProfile();" height="51px" />
+                    <a uib-dropdown-toggle href>
+                        <span class="clear">
+                            <span class="block m-t-xs">
+                                <strong class="font-bold">{{$user.userName | capitalize}}</strong>
+                            </span>
+                        <p class="m-b-0" ng-repeat="venue in $user.venues" ng-if="$user.role != 'accountadmin'">
+                            <i class="fa fa-map-marker"></i> &nbsp;{{venue.venueName | capitalize}}
+                        </p>
+                        <span class="text-muted text-xs block" ng-if="$user.role == 'admin' || $user.role == 'accountadmin' || $user.role=='manager'">{{$user.role | capitalize}}
+                            <b class="caret"></b>
+                        </span>
+                        <span class="text-muted text-xs block" ng-if="$user.role == 'chauffeur'">Supervisor / Cashier
+                            <b class="caret"></b>
+                        </span> 
+                        <span class="text-muted text-xs block" ng-if="$user.role == 'driver'">Driver
+                            <b class="caret"></b>
+                        </span>
+                        </span>
+                    </a>
+                    <ul uib-dropdown-menu class="animated fadeInRight m-t-xs">
+                        <li><a ui-sref="app.userProfile">Profile</a></li>
+                        <!-- <li><a ui-sref="app.contacts">Contacts</a></li>
+                        <li><a ui-sref="mailbox.inbox">Mailbox</a></li> -->
+                        <li class="divider"></li>
+                        <li ng-controller="loginCtrl"><a ng-click="logout()">Logout</a></li>
+                    </ul>
+                </div>
+                <div class="p-xs logo-element">
+                    <img ng-if="$user.accountID && ($user.accountID.id != '5a063bc79f8caede0a58fd39' &&  $user.accountID.id != '5b290da170c15aef1177c651')" class="img-thumbnail" alt="image" width="50px" src="img/logo.png" />
+                    <img ng-if="$user.accountID && $user.accountID.id=='5a063bc79f8caede0a58fd39'" class="img-thumbnail" alt="image" width="50px" src="img/oscar-logo/logo.png" />
+                    <img ng-if="$user.accountID && $user.accountID.id==='5b290da170c15aef1177c651'" class="img-thumbnail" alt="image" width="220px" src="img/TVC-small.png" />
+                </div>
+            </li>
+            <li ui-sref-active="active" ng-if="$user.role == 'admin'">
+                <a ui-sref="app.superadminDashboard">
+                    <i class="fa fa-dashboard"></i>
+                    <span class="nav-label">{{ 'DASHBOARD' | translate }}</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" ng-if="$user.role == 'accountadmin'">
+                <a ui-sref="app.mainDashboard">
+                    <i class="fa fa-dashboard"></i>
+                    <span class="nav-label">{{ 'DASHBOARD' | translate }}</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" ng-if="$user.role == 'accountinguser'">
+                <a ui-sref="app.dashboard">
+                    <i class="fa fa-dashboard"></i>
+                    <span class="nav-label">{{ 'DASHBOARD' | translate }}</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" ng-if="($user.role =='chauffeur' || $user.role =='driver') || ($user.role =='accountadmin' && !$user.extraOptions.carTransaction)">
+                <a ui-sref="app.carTransaction">
+                    <i class="fa fa-car"></i>
+                    <span class="nav-label">{{ 'Car Transaction' | translate }}</span>
+                </a>
+            </li>
+            <li ng-class="{active: $state.includes('settings')}" ng-if="$user.role =='admin' || ($user.role =='accountadmin' && !$user.extraOptions.settings)">
+                <a href="#"><i class="fa fa-gear"></i> <span class="nav-label">{{ 'Settings' | translate }}</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse" ng-class="{in: $state.includes('settings')}">
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin'">
+                        <a ui-sref="settings.accountUserList">
+                            <i class="fa fa-user-o"></i>
+                            <span class="nav-label"></span>Users
+                        </a>
+                    </li>
+                    <!-- <li ui-sref-active="active">
+                        <a ui-sref="settings.users" ng-if="$user.role=='admin' || $user.role=='manager'">
+                            <i class="fa fa-user-o"></i>
+                            <span class="nav-label"></span> Users
+                        </a>
+                    </li> -->
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin'">
+                        <a ui-sref="settings.accountCustomerTypes">
+                            <i class="fa fa-sliders"></i>
+                            <span class="nav-label"></span> Customer Type
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin'">
+                        <a ui-sref="settings.venue">
+                            <i class="fa fa-map-marker"></i>
+                            <span class="nav-label"></span>Venue
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin'">
+                        <a ui-sref="settings.subscription">
+                            <i class="fa fa-clock-o"></i>
+                            <span class="nav-label"></span> Subscription
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin'">
+                        <a ui-sref="settings.reportSetting">
+                            <i class="fa fa-gear"></i>
+                            <span class="nav-label"></span> Report Setting
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='admin'">
+                        <a ui-sref="settings.accountList">
+                            <i class="fa fa-home"></i>
+                            <span class="nav-label"></span>Accounts
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='admin'">
+                        <a ui-sref="settings.subscriptionList">
+                            <i class="fa fa-clock-o"></i>
+                            <span class="nav-label"></span>Subscription
+                        </a>
+                    </li>
+                    <!-- <li ui-sref-active="active" ng-if="$user.role=='accountadmin' || $user.role=='manager'">
+                        <a ui-sref="settings.support">
+                            <i class="fa fa-question-circle"></i>
+                            <span class="nav-label">{{ 'Help & Services' | translate }}</span>
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin' || $user.role=='manager'">
+                        <a ui-sref="settings.policies">
+                            <i class="fa fa-lock"></i>
+                            <span class="nav-label">{{ 'Policies' | translate }}</span>
+                        </a>
+                    </li>
+                    <li ui-sref-active="active" ng-if="$user.role=='accountadmin' || $user.role=='manager'">
+                        <a ui-sref="settings.aboutus">
+                            <i class="fa fa-info-circle"></i>
+                            <span class="nav-label">{{ 'About Us' | translate }}</span>
+                        </a>
+                    </li> -->
+                </ul>
+            </li>
+            <li ui-sref-active="active" ng-if="$user.role !='driver'  && $user.role !='accountinguser'  && $user.role !='admin'   && $user.role !='validator'">
+                <a ui-sref="monitor">
+                    <i class="fa fa-desktop"></i>
+                    <span class="nav-label">{{ 'Monitor' | translate }}</span>
+                </a>
+            </li>
+            <!-- <li ui-sref-active="active" ng-show="$user.role=='accountadmin' || $user.role == 'manager' || $user.role == 'admin' || $user.role == 'accountinguser' || $user.role=='chauffeur'">
+                <a ui-sref="app.report">
+                    <i class="fa fa-pie-chart"></i>
+                    <span class="nav-label">{{ 'Report' | translate }}</span>
+                </a>
+            </li> -->
+            <li ng-class="{active: $state.includes('app')}" ng-show="$user.role=='accountadmin' || $user.role == 'manager' || $user.role == 'accountinguser' || $user.role=='chauffeur'">
+                <a href="#">
+                    <i class="fa fa-calendar"></i>
+                    <span class="nav-label">{{ 'Report' | translate }}</span>
+                    <span class="fa arrow"></span>
+                </a>
+                <ul class="nav nav-second-level collapse" ng-class="{in: $state.includes('app')}">
+                    <li ui-sref-active="active">
+                        <a ui-sref="app.report">
+                            <i class="fa fa-pie-chart"></i>
+                            <span class="nav-label"></span> Report
+                        </a>
+                    </li>
+                    <li ui-sref-active="active">
+                        <a ui-sref="app.dailyReport">
+                            <i class="fa fa-bar-chart"></i>
+                            <span class="nav-label"></span>Hourly Report
+                        </a>
+                    </li>                    
+                </ul>
+            </li>
+            <li ui-sref-active="active" ng-show="$user.role=='admin'">
+                <a ui-sref="app.report">
+                    <i class="fa fa-pie-chart"></i>
+                    <span class="nav-label">{{ 'Report' | translate }}</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" ng-show="$user.role=='accountadmin' || $user.role == 'accountinguser' || $user.role=='chauffeur'">
+                <a ui-sref="app.chart">
+                    <i class="fa fa-bar-chart-o"></i>
+                    <span class="nav-label">{{ 'Analysis' | translate }}</span>
+                </a>
+            </li>
+            <li ui-sref-active="active" ng-show="$user.role=='validator'">
+                <a ui-sref="app.validate">
+                    <i class="fa fa-ticket"></i>
+                    <span class="nav-label">{{ 'Validate Ticket' | translate }}</span>
+                </a>
+            </li>
+            <li ui-sref-active="active">
+                <a ui-sref="app.userProfile">
+                    <i class="fa fa-user"></i>
+                    <span class="nav-label">{{ 'Profile' | translate }}</span>
+                </a>
+            </li> 
+        </ul>
+    </div>
+</nav>
